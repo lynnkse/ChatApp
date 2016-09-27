@@ -1,6 +1,8 @@
 #ifndef __PROTOCOL_H__
 #define __PROTOCOL_H__
 
+#include "internal.h"
+
 typedef struct Packet_t Packet_t;
 typedef enum Action {SOME_ACTION} Action;
 
