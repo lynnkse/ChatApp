@@ -1,0 +1,6 @@
+[config]
+MaxNumOfClients = 10
+TimeoutSec = 1
+BuffSize = 512
+IP = 127.0.0.1
+Port = 1321

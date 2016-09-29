@@ -2,6 +2,7 @@
 #define __USERMANAGER_H__
 
 #include "internal.h"
+#include "stddef.h"
 
 /*typedef struct User_t User_t;
 typedef struct UserDetails UserDetails;
@@ -21,9 +22,6 @@ ChatRes BanUser(Details_t* _details);
 ChatRes UnBanUser(Details_t* _details); 
 ChatRes BanFromGroup(Details_t* _details); 
 ChatRes UnBanFromGroup(Details_t* _details); */
-
-/*ChatRes SendMessage(Details_t* _details, void* _payload); length of payload is specified in _details
-ChatRes RecieveMessage(Details_t* _details, void** _payload);*/
 
 
 #endif /*__USERMANAGER_H__*/

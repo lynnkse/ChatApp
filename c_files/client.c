@@ -77,6 +77,53 @@ int GoToSelectFunc(ClientManager_t* _clientManager)
 	return (FD_ISSET(_clientManager->m_userInputFD, &rfds) == 1 ? _clientManager->m_userInputFD : _clientManager->m_socketDesc);
 }
 
+ChatRes ReceiveMessage(int _fd, void* _payload, size_t _payloadSize)
+{
+	size_t numOfBytesRead;	
+	Zlog* traceZlog;
+	Zlog* errorZlog;
+	
+	traceZlog = ZlogGet("trace");
+	errorZlog = ZlogGet("error");
+	
+	numOfBytesRead = read(_fd, _payload, _payloadSize);
+	
+	if(numOfBytesRead > 0)
+	{
+		ZLOG_SEND(traceZlog, LOG_TRACE, "%d bytes read", numOfBytesRead);
+	}
+	else 
+	{
+		ZLOG_SEND(errorZlog, LOG_ERROR, "couldn't read data from file descriptor, %d", 1);
+		return FAILURE;
+	}
+	
+	return SUCCESS;
+}
+
+ChatRes SendMessage(int _fd, void* _payload, size_t _payloadSize)
+{
+	int numOfBytesWritten;	
+	Zlog* traceZlog;
+	Zlog* errorZlog;
+	
+	traceZlog = ZlogGet("trace");
+	errorZlog = ZlogGet("error");
+	
+	numOfBytesWritten = write(_fd, _payload, _payloadSize); 
+	
+	if(numOfBytesWritten == ERROR)
+	{
+		ZLOG_SEND(errorZlog, LOG_ERROR, "couldn't send message, %d", 1);
+		return FAILURE;
+	}
+	else 
+	{
+		ZLOG_SEND(traceZlog, LOG_TRACE, "%d bytes sent in message", numOfBytesWritten);
+	}
+	
+	return SUCCESS;
+}
 
 
 

@@ -1,10 +1,13 @@
+#include "../inc/userInterface.h"
 #include "../inc/internal.h"
 #include "../inc/clientManager.h"
 #include "../inc/client.h"
-#include "/home/student/c/logger/logmngr.h"
+#include "../../logger/logmngr.h"
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*#define NDEBUG*/
 #define STDIN_FD 0
@@ -16,6 +19,10 @@
 
 static ConfigStruct* ReadConfigFile();
 
+/*-----API functions definitions-------*/
+
+
+
 /*-----------------MAIN----------------*/
 
 int main()
@@ -25,6 +32,8 @@ int main()
 	int usedFileDesc;
 	Zlog* traceZlog;
 	Zlog* errorZlog;
+	char dataBuffer[256];/*FIXME change this*/
+	UserInterface userInterface;
 	
 	ZlogInit(LOG_CONFIG_FILE);
 	
@@ -57,6 +66,9 @@ int main()
 	
 	clientManager->m_userInputFD = STDIN_FD;
 	
+	userInterface.m_choice = STARTUP;
+	RunUserInterface(&userInterface);
+	
 	while(1)/*TODO change this*/
 	{
 		usedFileDesc = GoToSelectFunc(clientManager);
@@ -69,18 +81,38 @@ int main()
 			#endif
 			return ERROR;
 		}
+		
+		memset(dataBuffer, 0, sizeof(dataBuffer));
+		ReceiveMessage(usedFileDesc, (void*) dataBuffer, sizeof(dataBuffer));
+		
+		if(usedFileDesc == clientManager->m_userInputFD)
+		{
+			userInterface.m_choice = atoi(dataBuffer);
+			RunUserInterface(&userInterface);
+			SendMessage(clientManager->m_socketDesc, &userInterface, sizeof(userInterface));
+		}
+		else
+		{
+			printf("Got from server: %s\n", dataBuffer);	
+		}
+			
+		/*!!!FOR TESTING ONLY!!!*/
+		
+		/*strcpy(dataBuffer, "some string to be sent");
+		SendMessage(usedFileDesc, dataBuffer, strlen(dataBuffer) + 1);
+		break;*/
+		/*------------------*/
 	}
 	
 	ZLOG_SEND(errorZlog, LOG_ERROR, "\n\n%d",1);
 	ZLOG_SEND(traceZlog, LOG_TRACE, "\n\n%d",1);
-	LogManagerDestroy();
 	
 	return 0;
 }
 
 /*-----------Static functions----------*/
 
-ConfigStruct* ReadConfigFile()
+static ConfigStruct* ReadConfigFile()
 {
 	ConfigStruct* configStruct;
 	
@@ -96,7 +128,7 @@ ConfigStruct* ReadConfigFile()
 	
 	/*hardcoded*/
 	configStruct->m_IPaddress = "127.0.0.1";
-	configStruct->m_port = 8888;
+	configStruct->m_port = 1321;
 	/*---------*/
 	
 	return configStruct;
