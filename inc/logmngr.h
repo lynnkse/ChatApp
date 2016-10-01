@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 #include <unistd.h>
-#include "zlog.h"
+#include "../inc/zlog.h"
 /*
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "­Wvariadic­macros"*/

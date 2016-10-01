@@ -1,7 +1,7 @@
 #include "../inc/server.h"
-#include "../../generic_hash/HashMap.h"
-#include "../../logger/logmngr.h"
-#include "../../logger/read_config.h"
+#include "../inc/HashMap.h"
+#include "../inc/logmngr.h"
+#include "../inc/read_config.h"
 #include "../inc/internal.h"
 
 #include <stdio.h>

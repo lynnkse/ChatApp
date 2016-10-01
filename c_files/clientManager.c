@@ -2,7 +2,7 @@
 #include "../inc/internal.h"
 #include "../inc/clientManager.h"
 #include "../inc/client.h"
-#include "../../logger/logmngr.h"
+#include "../inc/logmngr.h"
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>

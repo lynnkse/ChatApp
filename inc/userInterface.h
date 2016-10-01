@@ -1,7 +1,7 @@
 #ifndef __USERINTERFACE_H__
 #define __USERINTERFACE_H__
 
-#include "internal.h"
+#include "../inc/internal.h"
 
 void RunUserInterface();
 

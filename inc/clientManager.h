@@ -1,7 +1,7 @@
 #ifndef __USERMANAGER_H__
 #define __USERMANAGER_H__
 
-#include "internal.h"
+#include "../inc/internal.h"
 #include "stddef.h"
 
 /*typedef struct User_t User_t;

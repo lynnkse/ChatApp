@@ -1,9 +1,9 @@
 #ifndef __PRIVATE_LOG_H__
 #define __PRIVATE_LOG_H__
 
-#include "zlog.h"
-#include "stdio.h"
-#include "../generic_hash/HashMap.h" 
+#include "../inc/zlog.h"
+#include <stdio.h>
+#include "../inc/HashMap.h" 
 
 typedef struct Zlog Zlog;
 

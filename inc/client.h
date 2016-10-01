@@ -2,8 +2,7 @@
 #define __CLIENTMANAGER_H__
 
 
-#include "internal.h"
-#include "protocol.h"
+#include "../inc/internal.h"
 #include <stddef.h>
 
 /*typedef int ClientResult;

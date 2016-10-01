@@ -2,7 +2,7 @@
 #define __SERVERMANAGER_H__
 
 
-#include "internal.h"
+#include "../inc/internal.h"
 
 typedef struct ServerManager_t ServerManager_t;
 typedef struct ServerData ServerData;

@@ -6,7 +6,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <sys/select.h>
-#include "/home/student/c/logger/logmngr.h"
+#include "../inc/logmngr.h"
 
 
 #define ERROR -1
