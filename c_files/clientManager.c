@@ -128,7 +128,7 @@ static ConfigStruct* ReadConfigFile()
 	
 	/*hardcoded*/
 	configStruct->m_IPaddress = "127.0.0.1";
-	configStruct->m_port = 1321;
+	configStruct->m_port = 1331;
 	/*---------*/
 	
 	return configStruct;

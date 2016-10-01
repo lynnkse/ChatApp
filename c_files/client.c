@@ -8,7 +8,6 @@
 #include <sys/select.h>
 #include "../inc/logmngr.h"
 
-
 #define ERROR -1
 
 SocketDesc InitializeConnectionWithTCPserver(ConfigStruct* _configStruct)

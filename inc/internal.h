@@ -6,7 +6,7 @@
 #define ERROR -1
 
 typedef int ChatRes;
-typedef enum UserChoise {STARTUP = 0, REGISTER, LOGIN} UserChoise;
+typedef enum UserChoise {STARTUP = -1, REGISTER, LOGIN} UserChoise;
 typedef int SocketDesc;
 
 typedef struct ConfigStruct

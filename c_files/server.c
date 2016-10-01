@@ -187,7 +187,8 @@ Server_t* ServerCreate(ServerArguments _arguments)
 	char* sBuffSize;
 	char* IP;
 	char* sPort;
-	
+	struct sigaction sAction;	
+
 	Zlog* zlog = ZlogGet("error");
 	
 	server = (Server_t*) malloc(sizeof(Server_t));
@@ -196,6 +197,10 @@ Server_t* ServerCreate(ServerArguments _arguments)
 		ZLOG_SEND(zlog, LOG_ERROR, "couldn't allocate server %d", 1);
 		exit(-1);
 	}
+	
+	sAction.sa_sigaction = (void(*)(int, siginfo_t*, void*))sHandler;
+	sAction.sa_flags = SA_SIGINFO;
+	sigaction(SIGINT, &sAction, NULL);
 
 	configs = ReadConfig(_arguments.m_configFile);
 	configMap = GetNextConfig(configs);	
@@ -396,7 +401,7 @@ void* OnDeleteFunc(void* _arg1, void* _arg2)
 }
 
 
-
+/*
 int main() 
 {	
 	Server_t* server;
@@ -417,7 +422,8 @@ int main()
 	printf("asjksdfsdfsdf");
 
 	return 0;
-}
+}*/
+
 
 
 

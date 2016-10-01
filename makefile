@@ -3,7 +3,7 @@ CC = gcc
 
 # OBJ = ./obj/
 CLT_OBJS = clientManager.o client.o userInterface.o
-SRV_OBJS = server.o
+SRV_OBJS = server.o serverManager.o
 
 .PHONY: clean
 
@@ -24,6 +24,9 @@ server :  $(SRV_OBJS)
 	
 server.o : c_files/server.c inc/server.h inc/logmngr.h inc/internal.h 
 	$(CC) $(CFLAGS) c_files/server.c -D_POSIX_C_SOURCE=199309L
+
+serverManager.o : c_files/serverManager.c inc/serverManager.h inc/logmngr.h inc/internal.h 
+	$(CC) $(CFLAGS) c_files/serverManager.c 
 
 clean:
 	rm -f *.o
