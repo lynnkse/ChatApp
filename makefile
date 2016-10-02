@@ -3,7 +3,7 @@ CC = gcc
 
 # OBJ = ./obj/
 CLT_OBJS = clientManager.o client.o userInterface.o
-SRV_OBJS = server.o serverManager.o
+SRV_OBJS = server.o serverManager.o DBmanager.o
 
 .PHONY: clean
 
@@ -28,7 +28,55 @@ server.o : c_files/server.c inc/server.h inc/logmngr.h inc/internal.h
 serverManager.o : c_files/serverManager.c inc/serverManager.h inc/logmngr.h inc/internal.h 
 	$(CC) $(CFLAGS) c_files/serverManager.c 
 
+DBmanager.o : c_files/DBmanager.c inc/DBmanager.h inc/logmngr.h inc/internal.h 
+	$(CC) $(CFLAGS) c_files/DBmanager.c 
+
 clean:
 	rm -f *.o
 	rm -f server
 	rm -f client
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
