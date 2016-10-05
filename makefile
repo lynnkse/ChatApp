@@ -33,7 +33,10 @@ DBmanager.o : c_files/DBmanager.c inc/DBmanager.h inc/logmngr.h inc/internal.h i
 
 userDB.o : c_files/userDB.c inc/userDB.h inc/logmngr.h inc/internal.h inc/HashMap.h
 	$(CC) $(CFLAGS) c_files/userDB.c
-
+	
+groupDB.o : c_files/groupDB.c inc/groupDB.h inc/logmngr.h inc/internal.h inc/HashMap.h inc/list.h inc/list_itr.h inc/list_functions.h
+	$(CC) $(CFLAGS) c_files/groupDB.c
+	
 clean:
 	rm -f *.o
 	rm -f server

@@ -17,7 +17,7 @@ struct ServerManager_t
 static ChatRes RergisterNewUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
 static ChatRes DeleteUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
 static ChatRes LoginExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
-static ChatRes LogoutExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
+/*static ChatRes LogoutExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui); */
 static ChatRes CreateNewGroup(DBmanager_t* _DBmanager, UserInterface* _ui); 
 static ChatRes DeleteGroup(DBmanager_t* _DBmanager, UserInterface* _ui); 
 static ChatRes JoinGroup(DBmanager_t* _DBmanager, UserInterface* _ui); 
@@ -176,7 +176,7 @@ static ChatRes LoginExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 	return DBman_LookUpUser(_DBmanager, _ui);
 }
 
-static ChatRes LogoutExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui)
+/*static ChatRes LogoutExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -190,7 +190,7 @@ static ChatRes LogoutExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 	#endif
 
 	return SUCCESS;
-}
+}*/
 
 static ChatRes CreateNewGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 {

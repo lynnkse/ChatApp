@@ -14,7 +14,6 @@ void RunUserInterface(UserInterface* _userInterface)
 			printf("1. Register\n2. Login\n");
 			scanf("%u", (unsigned int*)&_userInterface->m_choice);
 			break;
-			/*TODO check for correct input*/
 		case REGISTER:
 			printf("Enter username:\n");
 			scanf("%s", (char*)&_userInterface->m_username);
