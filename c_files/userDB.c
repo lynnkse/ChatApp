@@ -18,6 +18,7 @@ struct User_t
 	char m_password[MAX_PASSWORD_LENGTH];
 	int m_isBanned;
 	int m_isActive;
+	int m_isLoggedIn;
 };
 
 /*---Static functions declarations---*/
@@ -86,11 +87,13 @@ ChatRes DB_RergisterNewUser(UserDB_t* _userDB, UserInterface* _ui)
 	if(HashMap_Insert(_userDB->m_users, user->m_username, user) == MAP_SUCCESS)
 	{
 		ZLOG_SEND(traceZlog, LOG_TRACE, "New user was created, %d",1);
+		_ui->m_choice = REGISTER_SUCCESS;
 		return SUCCESS;
 	}
 	else
 	{
 		ZLOG_SEND(errorZlog, LOG_ERROR, "Fail to insert new user, %d",1);
+		_ui->m_choice = REGISTER_FAIL;
 		return FAILURE;
 	}
 }
@@ -173,7 +176,41 @@ ChatRes DB_LookUpUser(UserDB_t* _userDB, UserInterface* _ui)
 	if(HashMap_Find(_userDB->m_users, _ui->m_username, (void**) &user) == MAP_SUCCESS)
 	{
 		ZLOG_SEND(traceZlog, LOG_TRACE, "User found, %d",1);
+		user->m_isLoggedIn = 1;
+		_ui->m_choice = LOGIN_SUCCESS;
 		return SUCCESS;
+	}
+	else
+	{
+		ZLOG_SEND(traceZlog, LOG_TRACE, "User not found, %d",1);
+		_ui->m_choice = LOGIN_SUCCESS;
+		return FAILURE;
+	}	
+}
+
+ChatRes DB_LogoutUser(UserDB_t* _userDB, UserInterface* _ui)/*logout failure should never happen*/
+{
+	User_t* user;
+	Zlog* traceZlog;
+	Zlog* errorZlog;
+
+	traceZlog = ZlogGet("trace");
+	errorZlog = ZlogGet("error");
+	
+	if(HashMap_Find(_userDB->m_users, _ui->m_username, (void**) &user) == MAP_SUCCESS)
+	{
+		ZLOG_SEND(traceZlog, LOG_TRACE, "User found, %d",1);
+		if(user->m_isLoggedIn)
+		{
+			user->m_isLoggedIn = 0;
+			_ui->m_choice = LOGOUT_SUCCESS;
+			return SUCCESS;
+		}
+		else
+		{
+			ZLOG_SEND(traceZlog, LOG_TRACE, "User isn't logged in, %d",1);
+			return FAILURE;
+		}
 	}
 	else
 	{

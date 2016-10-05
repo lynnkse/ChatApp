@@ -65,6 +65,11 @@ ChatRes DBman_LookUpUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 	return DB_LookUpUser(_DBmanager->m_userDB, _ui);
 }
 
+ChatRes DBman_LogoutUser(DBmanager_t* _DBmanager, UserInterface* _ui)
+{
+	return DB_LogoutUser(_DBmanager->m_userDB, _ui);
+}
+
 
 
 

@@ -15,5 +15,6 @@ ChatRes DB_DeleteUser(UserDB_t* _userDB, UserInterface* _ui);
 ChatRes DB_BanUser(UserDB_t* _userDB, UserInterface* _ui); 
 ChatRes DB_UnBanUser(UserDB_t* _userDB, UserInterface* _ui); 
 ChatRes DB_LookUpUser(UserDB_t* _userDB, UserInterface* _ui);
+ChatRes DB_LogoutUser(UserDB_t* _userDB, UserInterface* _ui);
 
 #endif

@@ -13,5 +13,6 @@ ChatRes DBman_DeleteUser(DBmanager_t* _DBmanager, UserInterface* _ui);
 ChatRes DBman_BanUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
 ChatRes DBman_UnBanUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
 ChatRes DBman_LookUpUser(DBmanager_t* _DBmanager, UserInterface* _ui);
+ChatRes DBman_LogoutUser(DBmanager_t* _DBmanager, UserInterface* _ui);
 
 #endif

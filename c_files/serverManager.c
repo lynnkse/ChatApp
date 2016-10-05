@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define USERS_CAP 100
+
 struct ServerManager_t
 {
 	DBmanager_t* m_DBmanager;
@@ -23,6 +25,7 @@ static ChatRes BanUser(DBmanager_t* _DBmanager, UserInterface* _ui);
 static ChatRes UnBanUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
 static ChatRes BanFromGroup(DBmanager_t* _DBmanager, UserInterface* _ui); 
 static ChatRes UnBanFromGroup(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes LogoutUser(DBmanager_t* _DBmanager, UserInterface* _ui);
 static void ProcessMessage(UserInterface* _ui, void* _context);
 static void* OnNewConnection(void* _arg1, void* _arg2);
 void* OnDisconnect(void* _arg1, void* _arg2);
@@ -30,9 +33,13 @@ void* OnDisconnect(void* _arg1, void* _arg2);
 /*=======================================*/
 int main()
 {
+	ServerManager_t* serverManager;
+	
 	ZlogInit("log_config");
 	
-	return OperateServer();
+	serverManager = CreateServerManager(USERS_CAP);
+	
+	return OperateServer(serverManager);
 }
 /*=======================================*/
 
@@ -70,7 +77,7 @@ void DestroyServerManager(ServerManager_t* _serverManager)
 	free(_serverManager);
 }
 
-ChatRes OperateServer()
+ChatRes OperateServer(ServerManager_t* _serverManager)
 {
 	ServerArguments args;
 	Server_t* server;
@@ -79,11 +86,14 @@ ChatRes OperateServer()
 	args.m_callbackExisting = (CallbackFunc_t) ProcessMessage;	
 	args.m_callbackDeletion = (CallbackFunc_t) OnDisconnect;	
 	args.m_configFile = "server_config";
+	args.m_serverManager = _serverManager;
 
 	server = ServerCreate(args);
 
 	ServerRun(server);
 	ServerDestroy(server);
+	
+	DestroyServerManager(_serverManager);
 
 	return SUCCESS;
 }
@@ -91,9 +101,10 @@ ChatRes OperateServer()
 /*---Static functions defenitions---*/
 static void ProcessMessage(UserInterface* _ui, void* _context)
 {
-	ChatRes (*userFunctions[11])(DBmanager_t* _DBmanager, UserInterface* _ui) = {RergisterNewUser, DeleteUser, LoginExistingUser, LogoutExistingUser, CreateNewGroup, DeleteGroup, JoinGroup, BanUser, UnBanUser, BanFromGroup, UnBanFromGroup};
+	ChatRes (*userFunctions[12])(DBmanager_t* _DBmanager, UserInterface* _ui) = {RergisterNewUser, LoginExistingUser, LogoutUser, DeleteUser, LogoutExistingUser, CreateNewGroup, DeleteGroup, JoinGroup, BanUser, UnBanUser, BanFromGroup, UnBanFromGroup};
 
 	_ui->m_result = userFunctions[(int)_ui->m_choice - 1](GetServerManager((Server_t*)_context)->m_DBmanager, _ui);
+	
 	SendToCurrentClient((Server_t*)_context, _ui, sizeof(UserInterface));
 }
 
@@ -291,6 +302,22 @@ static ChatRes UnBanFromGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 	#endif
 
 	return SUCCESS;
+}
+
+static ChatRes LogoutUser(DBmanager_t* _DBmanager, UserInterface* _ui)
+{
+	Zlog* traceZlog;
+	Zlog* errorZlog;
+
+	traceZlog = ZlogGet("trace");
+	errorZlog = ZlogGet("error");	
+
+	#ifndef NDEBUG
+		ZLOG_SEND(traceZlog, LOG_TRACE, "Logging out user, %d",1);
+		printf("Logging out user\n");
+	#endif
+
+	return DBman_LogoutUser(_DBmanager, _ui);
 }
 
 

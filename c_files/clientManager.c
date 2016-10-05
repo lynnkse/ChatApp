@@ -64,6 +64,9 @@ int main()
 		return ERROR;
 	}
 	
+	ReceiveMessage(clientManager->m_socketDesc, (void*) dataBuffer, sizeof(dataBuffer));
+	printf("Result from server: %s\n", dataBuffer);
+	
 	clientManager->m_userInputFD = STDIN_FD;
 	
 	userInterface.m_choice = STARTUP;
@@ -91,7 +94,9 @@ int main()
 			RunUserInterface(&userInterface);
 			SendMessage(clientManager->m_socketDesc, &userInterface, sizeof(userInterface));
 			ReceiveMessage(clientManager->m_socketDesc, (void*) dataBuffer, sizeof(dataBuffer));
-			printf("Result from server: %d\n", ((UserInterface*)dataBuffer)->m_result);
+			RunUserInterface((UserInterface*)dataBuffer);
+			RunUserInterface((UserInterface*)dataBuffer);
+			/*printf("Result from server: %d\n", ((UserInterface*)dataBuffer)->m_result);*/
 		}
 		else
 		{
@@ -130,7 +135,7 @@ static ConfigStruct* ReadConfigFile()
 	
 	/*hardcoded*/
 	configStruct->m_IPaddress = "127.0.0.1";
-	configStruct->m_port = 1341;
+	configStruct->m_port = 1343;
 	/*---------*/
 	
 	return configStruct;

@@ -10,9 +10,9 @@ void RunUserInterface(UserInterface* _userInterface)
 	switch(_userInterface->m_choice)
 	{
 		case STARTUP:
-			printf("Welcome!\n");
+			/*printf("Welcome!\n");*/
 			printf("1. Register\n2. Login\n");
-			scanf("%u", &_userInterface->m_choice);
+			/*scanf("%u", (unsigned int*)&_userInterface->m_choice);*/
 			break;
 			/*TODO check for correct input*/
 		case REGISTER:
@@ -26,6 +26,32 @@ void RunUserInterface(UserInterface* _userInterface)
 			scanf("%s", (char*)&_userInterface->m_username);
 			printf("Enter password:\n");
 			scanf("%s", (char*)&_userInterface->m_password);
+			break;
+		case LOGOUT:
+			_userInterface->m_choice = LOGOUT;
+			break;
+		case DELETE:
+			_userInterface->m_choice = DELETE_USER;
+			break;
+		case REGISTER_SUCCESS:
+			printf("Registered successfully!\n");
+			_userInterface->m_choice = STARTUP;
+			break;
+		case REGISTER_FAIL:
+			printf("Registered failed!\n");
+			_userInterface->m_choice = STARTUP;
+			break;
+		case LOGIN_SUCCESS:
+			printf("Logged in successfully!\n");
+			printf("1. Logout\n2. Delete");
+			scanf("%u", (unsigned int*)&_userInterface->m_choice);
+			_userInterface->m_choice -= 2;
+			break;
+		case LOGIN_FAIL:
+			printf("Login failed!\n");
+			_userInterface->m_choice = STARTUP;
+			break;
+		case LOGOUT_SUCCESS:
 			break;
 	}
 }
