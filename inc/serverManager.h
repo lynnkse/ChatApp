@@ -7,7 +7,7 @@
 
 typedef struct ServerManager_t ServerManager_t;
 
-ServerManager_t* CreateServerManager(size_t _cap);
+ServerManager_t* CreateServerManager(size_t _cap, size_t _groupsCap);
 void DestroyServerManager(ServerManager_t* _serverManager);
 
 /*typedef struct ServerData ServerData;*/

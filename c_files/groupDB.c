@@ -1,11 +1,13 @@
 #include "../inc/groupDB.h"
 #include "../inc/HashMap.h"
+#include "../inc/logmngr.h"
 #include "../inc/list.h"
 #include "../inc/list_itr.h"
 #include "../inc/list_functions.h"
 #include <string.h>
+#include <stdlib.h>
 
-struct UserDB_t
+struct GroupDB_t
 {
 	HashMap* m_groups;	
 };
@@ -21,8 +23,9 @@ static int HashFunc(char *str);
 static int IsKeysEqual(char* _key1, char* _key2);
 static void DestroyVal(void* _val);
 static Group_t* FindGroup(GroupDB_t* _groupDB, UserInterface* _ui);
-static Group_t* CreateGroup(UserInterface _ui);
-static DestroyGroup(Group_t* _group);
+static Group_t* CreateGroup(UserInterface* _ui);
+static void DestroyGroup(Group_t* _group);
+static ListItr IsUserMemberOfTheGroup(Group_t* _group, UserInterface* _ui);
 
 /*---API functions defenitions---*/
 GroupDB_t* CreateGroupDB(size_t _groupsCap)
@@ -52,7 +55,7 @@ GroupDB_t* CreateGroupDB(size_t _groupsCap)
 	return groupDB;
 }
 
-void DeleteGroupDB(GroupDB_t* _groupDB)
+void DestroyGroupDB(GroupDB_t* _groupDB)
 {
 	HashMap_Destroy(&_groupDB->m_groups, NULL, DestroyVal);
 	free(_groupDB);
@@ -79,13 +82,13 @@ ChatRes GroupDB_CreateNewGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 	{
 		ZLOG_SEND(traceZlog, LOG_TRACE, "New group created, %d",1);
 		_ui->m_choice = GROUP_CREATE_SUCCESS;
+		printf("%d\n", HashMap_Size(_groupDB->m_groups));
 		return SUCCESS;
 	}
 	else
 	{
 		ZLOG_SEND(errorZlog, LOG_ERROR, "Failed creating a group(insert fail), %d",1);
 		_ui->m_choice = GROUP_CREATE_FAILURE;
-		DestroyGroup(group);
 		return FAILURE;
 	}
 }
@@ -109,7 +112,7 @@ ChatRes GroupDB_DeleteGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 	
 	if(IsUserMemberOfTheGroup(group, _ui))
 	{
-		HashMap_Remove(_groupDB, _ui->m_groupname, (void**) &group);
+		HashMap_Remove(_groupDB->m_groups, _ui->m_groupname, (void**) &group);
 		DestroyGroup(group);
 		ZLOG_SEND(traceZlog, LOG_TRACE, "Group was deleted, %d",1);
 		_ui->m_choice = GROUP_DELETE_SUCCESS;
@@ -165,6 +168,7 @@ ChatRes GroupDB_UserLeaveGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 	char* username;
 	Zlog* traceZlog;
 	Zlog* errorZlog;
+	ListItr user;
 	
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");
@@ -173,24 +177,27 @@ ChatRes GroupDB_UserLeaveGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 	if(!group)
 	{
 		ZLOG_SEND(errorZlog, LOG_ERROR, "Group doesn't exist, %d",1);
-		_ui->m_choice = GROUP_LEAVE_SUCCESS;
+		_ui->m_choice = GROUP_LEAVE_FAILURE;
 		return FAILURE;
 	}
 	
-	if(IsUserMemberOfTheGroup(group, _ui))
+	if((user = IsUserMemberOfTheGroup(group, _ui)) != NULL)
 	{
-		/*FIXME */
+		ListItr_Remove(user);
+		ZLOG_SEND(traceZlog, LOG_TRACE, "User left group, %d",1);
+		_ui->m_choice = GROUP_LEAVE_SUCCESS;
+		return SUCCESS;
 	}
 	else
 	{
-		ZLOG_SEND(errorZlog, LOG_ERROR, "User is already member of the group, %d",1);
+		ZLOG_SEND(errorZlog, LOG_ERROR, "User is not a member of the group, %d",1);
 		_ui->m_choice = GROUP_JOIN_FAILURE;
 		return FAILURE;
 	}
 }
 
 /*---Static functions definitions---*/
-static int IsUserMemberOfTheGroup(Group_t* _group, UserInterface* _ui)
+static ListItr IsUserMemberOfTheGroup(Group_t* _group, UserInterface* _ui)
 {
 	ListItr begin, end;
 	begin = ListItr_Begin(_group->m_members);
@@ -199,15 +206,15 @@ static int IsUserMemberOfTheGroup(Group_t* _group, UserInterface* _ui)
 	begin = ListItr_FindFirst(begin, end, (PredicateFunction) IsKeysEqual, _ui->m_username);
 	if(begin != end)
 	{
-		return 1;
+		return begin;
 	}
 	else
 	{
-		return 0;
+		return NULL;
 	}
 }
 
-static Group_t* FindGroup(_groupDB, _ui)
+static Group_t* FindGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 {
 	Group_t* group = NULL;
 	HashMap_Find(_groupDB->m_groups, _ui->m_groupname, (void**) &group);
@@ -224,7 +231,7 @@ static Group_t* CreateGroup(UserInterface* _ui)
 		return NULL;
 	}
 	
-	strcmp(group->m_groupname, _ui->m_groupname);
+	strcpy(group->m_groupname, _ui->m_groupname);
 	
 	group->m_members = List_Create();
 	if(!group->m_members)
@@ -238,7 +245,7 @@ static Group_t* CreateGroup(UserInterface* _ui)
 
 static void DestroyGroup(Group_t* _group)
 {
-		List_Destroy(*_group->m_members, DestroyVal);
+		List_Destroy(&_group->m_members, DestroyVal);
 		free(_group);
 }
 
@@ -255,6 +262,7 @@ static int HashFunc(char *str)
 
 static int IsKeysEqual(char* _key1, char* _key2)
 {
+	printf("key1: %s, key2: %s\n", _key1, _key2);
 	return strcmp(_key1, _key2) == 0;
 }
 

@@ -74,8 +74,10 @@ int main()
 	
 	while(1)
 	{
-		if(userInterface.m_choice == REGISTER || userInterface.m_choice == LOGIN)
+		if(userInterface.m_choice == REGISTER || userInterface.m_choice == LOGIN/* || userInterface.m_choice == CREATE_GROUP || userInterface.m_choice == DELETE_GROUP|| userInterface.m_choice == JOIN_GROUP || userInterface.m_choice == LEAVE_GROUP*/)
+		{
 			RunUserInterface(&userInterface);
+		}
 		
 		SendMessage(clientManager->m_socketDesc, &userInterface, sizeof(userInterface));
 		ReceiveMessage(clientManager->m_socketDesc, (void*) &userInterface, sizeof(userInterface));
@@ -138,7 +140,7 @@ static ConfigStruct* ReadConfigFile()
 	
 	/*hardcoded*/
 	configStruct->m_IPaddress = "127.0.0.1";
-	configStruct->m_port = 1343;
+	configStruct->m_port = 1347;
 	/*---------*/
 	
 	return configStruct;
