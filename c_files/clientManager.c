@@ -32,7 +32,7 @@ int main()
 	int usedFileDesc;
 	Zlog* traceZlog;
 	Zlog* errorZlog;
-	char dataBuffer[256];/*FIXME change this*/
+	char dataBuffer[1024];/*FIXME change this*/
 	UserInterface userInterface;
 	
 	ZlogInit(LOG_CONFIG_FILE);
@@ -90,10 +90,12 @@ int main()
 			userInterface.m_choice = atoi(dataBuffer);
 			RunUserInterface(&userInterface);
 			SendMessage(clientManager->m_socketDesc, &userInterface, sizeof(userInterface));
+			ReceiveMessage(clientManager->m_socketDesc, (void*) dataBuffer, sizeof(dataBuffer));
+			printf("Result from server: %d\n", ((UserInterface*)dataBuffer)->m_result);
 		}
 		else
 		{
-			printf("Got from server: %s\n", dataBuffer);	
+			printf("Result from server: %d\n", ((UserInterface*)dataBuffer)->m_result);	
 		}
 			
 		/*!!!FOR TESTING ONLY!!!*/
@@ -128,7 +130,7 @@ static ConfigStruct* ReadConfigFile()
 	
 	/*hardcoded*/
 	configStruct->m_IPaddress = "127.0.0.1";
-	configStruct->m_port = 1331;
+	configStruct->m_port = 1341;
 	/*---------*/
 	
 	return configStruct;

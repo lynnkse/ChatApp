@@ -2,32 +2,74 @@
 #include "../inc/internal.h"
 #include "../inc/logmngr.h"
 #include "../inc/server.h"
+#include "../inc/DBmanager.h"
 #include <string.h>
+#include <stdlib.h>
+
+struct ServerManager_t
+{
+	DBmanager_t* m_DBmanager;
+};
 
 /*---Static functions declarations---*/
-static ChatRes RergisterNewUser(UserInterface* _ui); 
-static ChatRes DeleteUser(UserInterface* _ui); 
-static ChatRes LoginExistingUser(UserInterface* _ui); 
-static ChatRes LogoutExistingUser(UserInterface* _ui); 
-static ChatRes CreateNewGroup(UserInterface* _ui); 
-static ChatRes DeleteGroup(UserInterface* _ui); 
-static ChatRes JoinGroup(UserInterface* _ui); 
-static ChatRes BanUser(UserInterface* _ui); 
-static ChatRes UnBanUser(UserInterface* _ui); 
-static ChatRes BanFromGroup(UserInterface* _ui); 
-static ChatRes UnBanFromGroup(UserInterface* _ui); 
+static ChatRes RergisterNewUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes DeleteUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes LoginExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes LogoutExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes CreateNewGroup(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes DeleteGroup(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes JoinGroup(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes BanUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes UnBanUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes BanFromGroup(DBmanager_t* _DBmanager, UserInterface* _ui); 
+static ChatRes UnBanFromGroup(DBmanager_t* _DBmanager, UserInterface* _ui); 
 static void ProcessMessage(UserInterface* _ui, void* _context);
 static void* OnNewConnection(void* _arg1, void* _arg2);
 void* OnDisconnect(void* _arg1, void* _arg2);
 
+/*=======================================*/
 int main()
 {
 	ZlogInit("log_config");
 	
 	return OperateServer();
 }
+/*=======================================*/
 
 /*---API functions definitions---*/
+ServerManager_t* CreateServerManager(size_t _cap)
+{
+	ServerManager_t* serverManager;
+	Zlog* traceZlog;
+	Zlog* errorZlog;
+
+	traceZlog = ZlogGet("trace");
+	errorZlog = ZlogGet("error");
+	
+	serverManager = (ServerManager_t*) malloc(sizeof(ServerManager_t));
+	if(!serverManager)
+	{
+		ZLOG_SEND(errorZlog, LOG_TRACE, "couldn't create server manager, %d",1);
+		return NULL;
+	}
+
+	serverManager->m_DBmanager = CreateDBManager(_cap);
+	if(!serverManager->m_DBmanager)
+	{
+		ZLOG_SEND(errorZlog, LOG_TRACE, "couldn't create DB manager, %d",1);
+		free(serverManager);
+		return NULL;
+	}
+
+	return serverManager;
+}
+
+void DestroyServerManager(ServerManager_t* _serverManager)
+{
+	DestroyDBmanager(_serverManager->m_DBmanager);
+	free(_serverManager);
+}
+
 ChatRes OperateServer()
 {
 	ServerArguments args;
@@ -49,9 +91,10 @@ ChatRes OperateServer()
 /*---Static functions defenitions---*/
 static void ProcessMessage(UserInterface* _ui, void* _context)
 {
-	ChatRes (*userFunctions[11])(UserInterface* _ui) = {RergisterNewUser, DeleteUser, LoginExistingUser, LogoutExistingUser, CreateNewGroup, DeleteGroup, JoinGroup, BanUser, UnBanUser, BanFromGroup, UnBanFromGroup};
+	ChatRes (*userFunctions[11])(DBmanager_t* _DBmanager, UserInterface* _ui) = {RergisterNewUser, DeleteUser, LoginExistingUser, LogoutExistingUser, CreateNewGroup, DeleteGroup, JoinGroup, BanUser, UnBanUser, BanFromGroup, UnBanFromGroup};
 
-	userFunctions[(int)_ui->m_choice - 1](_ui);
+	_ui->m_result = userFunctions[(int)_ui->m_choice - 1](GetServerManager((Server_t*)_context)->m_DBmanager, _ui);
+	SendToCurrentClient((Server_t*)_context, _ui, sizeof(UserInterface));
 }
 
 void* OnNewConnection(void* _arg1, void* _arg2)
@@ -74,7 +117,7 @@ void* OnDisconnect(void* _arg1, void* _arg2)
 	return NULL;
 }
 
-static ChatRes RergisterNewUser(UserInterface* _ui)
+static ChatRes RergisterNewUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -87,10 +130,10 @@ static ChatRes RergisterNewUser(UserInterface* _ui)
 		printf("Registering new user\n");
 	#endif
 
-	return SUCCESS;
+	return DBman_RergisterNewUser(_DBmanager, _ui); 
 }
 
-static ChatRes DeleteUser(UserInterface* _ui)
+static ChatRes DeleteUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -99,14 +142,14 @@ static ChatRes DeleteUser(UserInterface* _ui)
 	errorZlog = ZlogGet("error");	
 
 	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Deleting new user, %d",1);
-		printf("Deleting new user\n");
+		ZLOG_SEND(traceZlog, LOG_TRACE, "Deleting user, %d",1);
+		printf("Deleting user\n");
 	#endif
 
-	return SUCCESS;
+	return DBman_DeleteUser(_DBmanager, _ui);
 }
 
-static ChatRes LoginExistingUser(UserInterface* _ui)
+static ChatRes LoginExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -119,10 +162,10 @@ static ChatRes LoginExistingUser(UserInterface* _ui)
 		printf("Logging in new user\n");
 	#endif
 
-	return SUCCESS;
+	return DBman_LookUpUser(_DBmanager, _ui);
 }
 
-static ChatRes LogoutExistingUser(UserInterface* _ui)
+static ChatRes LogoutExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -138,7 +181,7 @@ static ChatRes LogoutExistingUser(UserInterface* _ui)
 	return SUCCESS;
 }
 
-static ChatRes CreateNewGroup(UserInterface* _ui)
+static ChatRes CreateNewGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -154,7 +197,7 @@ static ChatRes CreateNewGroup(UserInterface* _ui)
 	return SUCCESS;
 }
 
-static ChatRes DeleteGroup(UserInterface* _ui)
+static ChatRes DeleteGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -170,7 +213,7 @@ static ChatRes DeleteGroup(UserInterface* _ui)
 	return SUCCESS;
 }
 
-static ChatRes JoinGroup(UserInterface* _ui)
+static ChatRes JoinGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -186,7 +229,7 @@ static ChatRes JoinGroup(UserInterface* _ui)
 	return SUCCESS;
 }
 
-static ChatRes BanUser(UserInterface* _ui)
+static ChatRes BanUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -199,10 +242,10 @@ static ChatRes BanUser(UserInterface* _ui)
 		printf("Banning user\n");
 	#endif
 
-	return SUCCESS;
+	return DBman_BanUser(_DBmanager, _ui);
 }
 
-static ChatRes UnBanUser(UserInterface* _ui)
+static ChatRes UnBanUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -215,10 +258,10 @@ static ChatRes UnBanUser(UserInterface* _ui)
 		printf("Unbanning user\n");
 	#endif
 
-	return SUCCESS;
+	return DBman_UnBanUser(_DBmanager, _ui);
 }
 
-static ChatRes BanFromGroup(UserInterface* _ui)
+static ChatRes BanFromGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;
@@ -234,7 +277,7 @@ static ChatRes BanFromGroup(UserInterface* _ui)
 	return SUCCESS;
 }
 
-static ChatRes UnBanFromGroup(UserInterface* _ui)
+static ChatRes UnBanFromGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	Zlog* traceZlog;
 	Zlog* errorZlog;

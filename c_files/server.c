@@ -3,6 +3,7 @@
 #include "../inc/logmngr.h"
 #include "../inc/read_config.h"
 #include "../inc/internal.h"
+#include "../inc/serverManager.h"
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -50,6 +51,7 @@ struct Server_t
 	int m_buffSize;
 	int m_maxNumOfClients;
 	int m_timeout;
+	ServerManager_t* m_serverManager;
 };
 
 static void sHandler(int _sigNum, siginfo_t* _sigInfo, char* _sigContext)
@@ -219,6 +221,7 @@ Server_t* ServerCreate(ServerArguments _arguments)
 	server->m_buffSize = atoi(sBuffSize);
 	server->m_maxNumOfClients = atoi(sMaxNumOfClients);
 	server->m_timeout = atoi(sTimeout);
+	server->m_serverManager = _arguments.m_serverManager;
 	
 	printf("Before. Server IP: %s, Port: %d\n", server->m_IP, server->m_port);
 
@@ -375,6 +378,11 @@ void SendToCurrentClient(Server_t* _server, void* _data, size_t _dataSize)
 	write(_server->m_currSocket, _data, _dataSize);
 }
 
+ServerManager_t* GetServerManager(Server_t* _server)
+{
+	return _server->m_serverManager;
+}
+
 /****************************TEST*****************************/
 
 void PrintFunc(char* _str, void* _context)
@@ -383,7 +391,7 @@ void PrintFunc(char* _str, void* _context)
 	
 	userInterface = (UserInterface*) _str;
 	
-	printf("Username: %s\nPassword: %s\nCommand: %u\n", userInterface->m_userName, userInterface->m_password, userInterface->m_choice);
+	printf("Username: %s\nPassword: %s\nCommand: %u\n", userInterface->m_username, userInterface->m_password, userInterface->m_choice);
 }
 
 void* OnCreateFunc(void* _arg1, void* _arg2)

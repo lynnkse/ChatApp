@@ -3,12 +3,14 @@
 
 
 #include "../inc/internal.h"
+#include <stddef.h>
 
-/*typedef struct ServerManager_t ServerManager_t;
-typedef struct ServerData ServerData;
+typedef struct ServerManager_t ServerManager_t;
 
-ServerManager_t* CreateServerManager(ServerData _ data);
-void DestroyServerManager(ServerManager_t* _serverManager);*/
+ServerManager_t* CreateServerManager(size_t _cap);
+void DestroyServerManager(ServerManager_t* _serverManager);
+
+/*typedef struct ServerData ServerData;*/
 
 ChatRes OperateServer();
 

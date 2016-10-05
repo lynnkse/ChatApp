@@ -23,10 +23,10 @@ typedef struct ClientManager_t
 
 typedef struct UserInterface
 {
-	char m_userName[128];
+	char m_username[128];
 	char m_password[128];
 	UserChoise m_choice;
-	
+	ChatRes m_result;
 }UserInterface;
 
 #endif /*__INTERNAL_H__*/

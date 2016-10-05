@@ -17,13 +17,13 @@ void RunUserInterface(UserInterface* _userInterface)
 			/*TODO check for correct input*/
 		case REGISTER:
 			printf("Enter username:\n");
-			scanf("%s", (char*)&_userInterface->m_userName);
+			scanf("%s", (char*)&_userInterface->m_username);
 			printf("Enter password:\n");
 			scanf("%s", (char*)&_userInterface->m_password);
 			break;
 		case LOGIN:
 			printf("Enter username:\n");
-			scanf("%s", (char*)&_userInterface->m_userName);
+			scanf("%s", (char*)&_userInterface->m_username);
 			printf("Enter password:\n");
 			scanf("%s", (char*)&_userInterface->m_password);
 			break;
