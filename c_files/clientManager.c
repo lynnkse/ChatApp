@@ -72,7 +72,18 @@ int main()
 	userInterface.m_choice = STARTUP;
 	RunUserInterface(&userInterface);
 	
-	while(1)/*TODO change this*/
+	while(1)
+	{
+		if(userInterface.m_choice == REGISTER || userInterface.m_choice == LOGIN)
+			RunUserInterface(&userInterface);
+		
+		SendMessage(clientManager->m_socketDesc, &userInterface, sizeof(userInterface));
+		ReceiveMessage(clientManager->m_socketDesc, (void*) &userInterface, sizeof(userInterface));
+		RunUserInterface(&userInterface);
+		RunUserInterface(&userInterface);
+	}
+	/*
+	while(1)
 	{
 		usedFileDesc = GoToSelectFunc(clientManager);
 		if(ERROR == usedFileDesc)
@@ -96,20 +107,12 @@ int main()
 			ReceiveMessage(clientManager->m_socketDesc, (void*) dataBuffer, sizeof(dataBuffer));
 			RunUserInterface((UserInterface*)dataBuffer);
 			RunUserInterface((UserInterface*)dataBuffer);
-			/*printf("Result from server: %d\n", ((UserInterface*)dataBuffer)->m_result);*/
 		}
 		else
 		{
 			printf("Result from server: %d\n", ((UserInterface*)dataBuffer)->m_result);	
 		}
-			
-		/*!!!FOR TESTING ONLY!!!*/
-		
-		/*strcpy(dataBuffer, "some string to be sent");
-		SendMessage(usedFileDesc, dataBuffer, strlen(dataBuffer) + 1);
-		break;*/
-		/*------------------*/
-	}
+	}*/
 	
 	ZLOG_SEND(errorZlog, LOG_ERROR, "\n\n%d",1);
 	ZLOG_SEND(traceZlog, LOG_TRACE, "\n\n%d",1);

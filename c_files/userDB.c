@@ -107,10 +107,11 @@ ChatRes DB_DeleteUser(UserDB_t* _userDB, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");
 	
-	if(HashMap_Find(_userDB->m_users, _ui->m_username, (void**) &user) == MAP_SUCCESS)
+	if(HashMap_Remove(_userDB->m_users, _ui->m_username, (void**) &user) == MAP_SUCCESS)
 	{
 		user->m_isActive = 0;
 		ZLOG_SEND(traceZlog, LOG_TRACE, "User deleted, %d",1);
+		_ui->m_choice = DELETE_SUCCESS;
 		return SUCCESS;
 	}
 	else
@@ -175,15 +176,23 @@ ChatRes DB_LookUpUser(UserDB_t* _userDB, UserInterface* _ui)
 	
 	if(HashMap_Find(_userDB->m_users, _ui->m_username, (void**) &user) == MAP_SUCCESS)
 	{
-		ZLOG_SEND(traceZlog, LOG_TRACE, "User found, %d",1);
-		user->m_isLoggedIn = 1;
-		_ui->m_choice = LOGIN_SUCCESS;
-		return SUCCESS;
+		if(user->m_isActive == 1 && user->m_isBanned == 0 && strcmp(_ui->m_password, user->m_password) == 0)
+		{
+			ZLOG_SEND(traceZlog, LOG_TRACE, "User found, %d",1);
+			user->m_isLoggedIn = 1;
+			_ui->m_choice = LOGIN_SUCCESS;
+			return SUCCESS;
+		}
+		else
+		{
+			_ui->m_choice = LOGIN_FAIL;
+			return FAILURE;
+		}
 	}
 	else
 	{
 		ZLOG_SEND(traceZlog, LOG_TRACE, "User not found, %d",1);
-		_ui->m_choice = LOGIN_SUCCESS;
+		_ui->m_choice = LOGIN_FAIL;
 		return FAILURE;
 	}	
 }
