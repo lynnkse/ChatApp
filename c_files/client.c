@@ -51,14 +51,11 @@ SocketDesc InitializeConnectionWithTCPserver(ConfigStruct* _configStruct)
 	return socketDesc;
 }
 
-int GoToSelectFunc(ClientManager_t* _clientManager)
+/*int GoToSelectFunc(ClientManager_t* _clientManager)
 {
-	/*Zlog* traceZlog;*/
-	Zlog* errorZlog;
 	fd_set rfds;
-	
-	/*traceZlog = ZlogGet("trace");*/
-	errorZlog = ZlogGet("error");
+
+	ZLOGS_INITIALIZATION;
 	
 	FD_ZERO(&rfds);
 	FD_SET(_clientManager->m_userInputFD, &rfds);	
@@ -67,14 +64,11 @@ int GoToSelectFunc(ClientManager_t* _clientManager)
 	if((select(FD_SETSIZE, &rfds, NULL, NULL, NULL) == ERROR) && (errno != EINTR))
 	{
 		ZLOG_SEND(errorZlog, LOG_ERROR, "Select() failed, %d",1);
-		#ifndef NDEBUG
-			perror("Select failed\n");
-		#endif
 		return ERROR;
 	}
 	
 	return (FD_ISSET(_clientManager->m_userInputFD, &rfds) == 1 ? _clientManager->m_userInputFD : _clientManager->m_socketDesc);
-}
+}*/
 
 ChatRes ReceiveMessage(int _fd, void* _payload, size_t _payloadSize)
 {

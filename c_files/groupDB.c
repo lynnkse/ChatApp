@@ -7,6 +7,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+
+#define LAST_BYTE 16
+#define BASE_MULTICAST_IP "224.0.0.15"
+
 struct GroupDB_t
 {
 	HashMap* m_groups;	
@@ -16,6 +20,8 @@ struct Group_t
 {
 	char m_groupname[MAX_USERNAME_LENGTH];
 	List* m_members;
+	char* m_admin;
+	char m_IP[IP_ADDR_LEN];
 };
 
 /*---Static functions declarations---*/
@@ -196,6 +202,40 @@ ChatRes GroupDB_UserLeaveGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 	}
 }
 
+ChatRes GroupDB_StartChat(GroupDB_t* _groupDB, UserInterface* _ui)
+{
+	Zlog* traceZlog;
+	Zlog* errorZlog;
+	Group_t* group = NULL;
+	ListItr user;
+	
+	traceZlog = ZlogGet("trace");
+	errorZlog = ZlogGet("error");
+	
+	group = FindGroup(_groupDB, _ui);
+	if(!group)
+	{
+		ZLOG_SEND(errorZlog, LOG_ERROR, "Group doesn't exist, %d",1);
+		_ui->m_choice = START_CHAT_FAILURE;
+		return FAILURE;
+	}
+	
+	if((user = IsUserMemberOfTheGroup(group, _ui)) != NULL)
+	{
+		ZLOG_SEND(traceZlog, LOG_TRACE, "User found and can start chat, %d",1);
+		_ui->m_choice = START_CHAT_SUCCESS;
+		strcpy(_ui->m_groupname, group->m_groupname);
+		strcpy(_ui->m_IP, group->m_IP);
+		return SUCCESS;
+	}
+	else
+	{
+		ZLOG_SEND(errorZlog, LOG_ERROR, "User is not a member of the group, %d",1);
+		_ui->m_choice = START_CHAT_FAILURE;
+		return FAILURE;
+	}
+}
+
 /*---Static functions definitions---*/
 static ListItr IsUserMemberOfTheGroup(Group_t* _group, UserInterface* _ui)
 {
@@ -224,6 +264,8 @@ static Group_t* FindGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 static Group_t* CreateGroup(UserInterface* _ui)
 {
 	Group_t* group;
+	static char multicastIP[] = BASE_MULTICAST_IP;
+	static int multicastIPlastByte  = LAST_BYTE;
 	
 	group = (Group_t*) malloc(sizeof(Group_t));
 	if(!group)
@@ -232,6 +274,13 @@ static Group_t* CreateGroup(UserInterface* _ui)
 	}
 	
 	strcpy(group->m_groupname, _ui->m_groupname);
+	strcpy(group->m_IP, multicastIP);
+	
+	printf("%s\n", group->m_IP);
+	
+	/*update multicast address to be given to the next group created*/
+	sprintf(multicastIP + 8, "%d", multicastIPlastByte);
+	++multicastIPlastByte;
 	
 	group->m_members = List_Create();
 	if(!group->m_members)

@@ -9,121 +9,117 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*#define NDEBUG*/
 #define STDIN_FD 0
 #define LOG_CONFIG_FILE "log_config"
+#define MAX_COMMAND_LEN 128
 
-#define CONFIG_FILE config.txt
+#define CONFIG_FILE "client_config"
+#define PORT_USED 2222
+#define DATA_BUFF_SIZE 512
+
+struct ClientManager_t
+{
+	SocketDesc m_socketDesc;
+	int m_userInputFD;
+};
+
+int g_isAlive = 1;
 
 /*-------Static Funcs Declarations-----*/
 
 static ConfigStruct* ReadConfigFile();
+static void StartChat(UserInterface* _ui);
 
 /*-----API functions definitions-------*/
+ClientManager_t* CreateClientManager()
+{
+	ClientManager_t* clientManager;
+	ConfigStruct* configStruct = NULL;
+	
+	clientManager = (ClientManager_t*) malloc(sizeof(ClientManager_t));
+	if(!clientManager)
+	{
+		return NULL;
+	}
+	
+	configStruct = ReadConfigFile();
+	if(!configStruct)
+	{
+		free(clientManager);
+		return NULL;
+	}
+	
+	if((clientManager->m_socketDesc = InitializeConnectionWithTCPserver(configStruct)) == ERROR)
+	{
+		free(clientManager);
+		free(configStruct);
+		return NULL;
+	}
+	
+	clientManager->m_userInputFD = STDIN_FD;
+	free(configStruct);
+	
+	return clientManager;
+}
 
+void OperateClient()
+{
+	
+	ClientManager_t* clientManager;
+	UserInterface userInterface;
+	void* dataBuffer;
+
+	ZLOGS_INITIALIZATION;
+
+	dataBuffer = malloc(DATA_BUFF_SIZE);
+
+	clientManager = CreateClientManager();
+	if(!clientManager)
+	{
+		ZLOG_SEND(errorZlog, LOG_ERROR, "Couldn't create client manager, %d", 1);
+		return;
+	}
+	
+	/*get greeting message from server*/
+	ReceiveMessage(clientManager->m_socketDesc, (void*) dataBuffer, sizeof(dataBuffer));
+	
+	/*set user interface in initial state*/
+	userInterface.m_choice = STARTUP;
+	
+	while(RunUserInterface(&userInterface))
+	{}
+	printf("91\n");
+	
+	while(g_isAlive)
+	{		
+		SendMessage(clientManager->m_socketDesc, &userInterface, sizeof(userInterface));
+		ReceiveMessage(clientManager->m_socketDesc, (void*) &userInterface, sizeof(userInterface));
+		
+		if(userInterface.m_choice == START_CHAT_SUCCESS)
+		{
+			StartChat(&userInterface);
+		}
+		printf("102\n");
+		do
+		{}
+		while(RunUserInterface(&userInterface));
+	}
+	
+	free(dataBuffer);
+}
 
 
 /*-----------------MAIN----------------*/
 
 int main()
-{
-	ConfigStruct* configStruct = NULL;
-	ClientManager_t* clientManager;
-	int usedFileDesc;
-	Zlog* traceZlog;
-	Zlog* errorZlog;
-	char dataBuffer[1024];/*FIXME change this*/
-	UserInterface userInterface;
-	
-	ZlogInit(LOG_CONFIG_FILE);
-	
-	traceZlog = ZlogGet("trace");
-	errorZlog = ZlogGet("error");
-
-	clientManager = (ClientManager_t*) malloc(sizeof(ClientManager_t));
-	if(NULL == clientManager)
-	{
-		ZLOG_SEND(errorZlog, LOG_ERROR, "Malloc for client manager failed, %d",1);
-		#ifndef NDEBUG
-			perror("Malloc for client manager failed\n");
-		#endif
-		return ERROR;
-	}
-	
-	configStruct = ReadConfigFile();
-	
-	printf("%p\n", (void*)configStruct);/*TODO delete this*/
-	
-	if((clientManager->m_socketDesc = InitializeConnectionWithTCPserver(configStruct)) == ERROR)
-	{
-		ZLOG_SEND(errorZlog, LOG_ERROR, "Connection with TCP server failed, %d",1);
-		#ifndef NDEBUG
-			perror("Connection with TCP server failed\n");
-		#endif
-		free(clientManager);
-		return ERROR;
-	}
-	
-	ReceiveMessage(clientManager->m_socketDesc, (void*) dataBuffer, sizeof(dataBuffer));
-	printf("Result from server: %s\n", dataBuffer);
-	
-	clientManager->m_userInputFD = STDIN_FD;
-	
-	userInterface.m_choice = STARTUP;
-	RunUserInterface(&userInterface);
-	
-	while(1)
-	{
-		if(userInterface.m_choice == REGISTER || userInterface.m_choice == LOGIN/* || userInterface.m_choice == CREATE_GROUP || userInterface.m_choice == DELETE_GROUP|| userInterface.m_choice == JOIN_GROUP || userInterface.m_choice == LEAVE_GROUP*/)
-		{
-			RunUserInterface(&userInterface);
-		}
-		
-		SendMessage(clientManager->m_socketDesc, &userInterface, sizeof(userInterface));
-		ReceiveMessage(clientManager->m_socketDesc, (void*) &userInterface, sizeof(userInterface));
-		RunUserInterface(&userInterface);
-		RunUserInterface(&userInterface);
-	}
-	/*
-	while(1)
-	{
-		usedFileDesc = GoToSelectFunc(clientManager);
-		if(ERROR == usedFileDesc)
-		{
-			free(clientManager);
-			ZLOG_SEND(errorZlog, LOG_ERROR, "GoToSelectFunc failed, %d",1);
-			#ifndef NDEBUG
-				perror("GoToSelectFunc failed\n");
-			#endif
-			return ERROR;
-		}
-		
-		memset(dataBuffer, 0, sizeof(dataBuffer));
-		ReceiveMessage(usedFileDesc, (void*) dataBuffer, sizeof(dataBuffer));
-		
-		if(usedFileDesc == clientManager->m_userInputFD)
-		{
-			userInterface.m_choice = atoi(dataBuffer);
-			RunUserInterface(&userInterface);
-			SendMessage(clientManager->m_socketDesc, &userInterface, sizeof(userInterface));
-			ReceiveMessage(clientManager->m_socketDesc, (void*) dataBuffer, sizeof(dataBuffer));
-			RunUserInterface((UserInterface*)dataBuffer);
-			RunUserInterface((UserInterface*)dataBuffer);
-		}
-		else
-		{
-			printf("Result from server: %d\n", ((UserInterface*)dataBuffer)->m_result);	
-		}
-	}*/
-	
-	ZLOG_SEND(errorZlog, LOG_ERROR, "\n\n%d",1);
-	ZLOG_SEND(traceZlog, LOG_TRACE, "\n\n%d",1);
+{		
+	ZlogInit(LOG_CONFIG_FILE);	
+	OperateClient();
 	
 	return 0;
 }
 
 /*-----------Static functions----------*/
-
 static ConfigStruct* ReadConfigFile()
 {
 	ConfigStruct* configStruct;
@@ -131,19 +127,37 @@ static ConfigStruct* ReadConfigFile()
 	configStruct = (ConfigStruct*) malloc(sizeof(ConfigStruct));
 	if(NULL == configStruct)
 	{
-		/*TODO logger*/
-		#ifndef NDEBUG
-			perror("Malloc failed\n");
-		#endif
 		return NULL;
 	}
 	
 	/*hardcoded*/
 	configStruct->m_IPaddress = "127.0.0.1";
-	configStruct->m_port = 1347;
+	configStruct->m_port = 1351;
 	/*---------*/
 	
 	return configStruct;
+}
+
+static void StartChat(UserInterface* _ui)
+{
+	char command[MAX_COMMAND_LEN];
+	int res;
+	
+	res = fork();
+	if(res == 0)
+	{
+		sprintf(command, "gnome-terminal -x sh -c \"./msgReceiver %s %d; bash\"", _ui->m_IP, PORT_USED);
+		system(command);
+	}
+	else
+	{
+		res = fork();
+		if(res == 0)
+		{
+			sprintf(command, "gnome-terminal -x sh -c \"./msgSender %s %d %s; bash\"", _ui->m_IP, PORT_USED, _ui->m_username);
+			system(command);
+		}
+	}
 }
 
 

@@ -20,4 +20,6 @@ ChatRes DBman_DeleteGroup(DBmanager_t* _DBmanager, UserInterface* _ui);
 ChatRes DBman_UserJoinGroup(DBmanager_t* _DBmanager, UserInterface* _ui);
 ChatRes DBman_UserLeaveGroup(DBmanager_t* _DBmanager, UserInterface* _ui);
 
+ChatRes DBman_StartChat(DBmanager_t* _DBmanager, UserInterface* _ui);
+
 #endif

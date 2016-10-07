@@ -76,6 +76,7 @@ ChatRes DB_RergisterNewUser(UserDB_t* _userDB, UserInterface* _ui)
 	if(!user)
 	{
 		ZLOG_SEND(errorZlog, LOG_ERROR, "Failed to create users HashMap, %d",1);
+		_ui->m_choice = REGISTER_FAIL;
 		return FAILURE;
 	}
 
@@ -93,6 +94,7 @@ ChatRes DB_RergisterNewUser(UserDB_t* _userDB, UserInterface* _ui)
 	else
 	{
 		ZLOG_SEND(errorZlog, LOG_ERROR, "Fail to insert new user, %d",1);
+		free(user);
 		_ui->m_choice = REGISTER_FAIL;
 		return FAILURE;
 	}

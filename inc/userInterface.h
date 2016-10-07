@@ -3,7 +3,7 @@
 
 #include "../inc/internal.h"
 
-void RunUserInterface();
+int RunUserInterface();
 
 
 UserInterface userInterface;

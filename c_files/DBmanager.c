@@ -102,6 +102,10 @@ ChatRes DBman_UserLeaveGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 	return GroupDB_UserLeaveGroup(_DBmanager->m_groupDB, _ui);
 }
 
+ChatRes DBman_StartChat(DBmanager_t* _DBmanager, UserInterface* _ui)
+{
+	return GroupDB_StartChat(_DBmanager->m_groupDB, _ui);
+}
 
 
 

@@ -10,7 +10,7 @@ typedef struct Client_t Client_t;*/
 
 /*void ProcessStructAndSendPacket();*/
 SocketDesc InitializeConnectionWithTCPserver(ConfigStruct* _configStruct);
-int GoToSelectFunc(ClientManager_t* _clientManager);
+/*int GoToSelectFunc(ClientManager_t* _clientManager);*/
 
 ChatRes SendMessage(int _fd, void* _payload, size_t _payloadSize);
 ChatRes ReceiveMessage(int _fd, void* _payload, size_t _payloadSize);
