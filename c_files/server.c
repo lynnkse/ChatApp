@@ -370,7 +370,6 @@ void PrintFunc(char* _str, void* _context)
 
 void* OnCreateFunc(void* _arg1, void* _arg2)
 {
-	printf("On create\n");
 	char string[] = "hi client";
 	SendToCurrentClient((Server_t*) _arg1, (void*) string, strlen(string) + 1);
 	return NULL;

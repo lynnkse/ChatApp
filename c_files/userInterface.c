@@ -1,191 +1,191 @@
 #include "../inc/userInterface.h"
+#include "../inc/internal.h"
 #include <stdio.h>
+#include <ctype.h>
+#include <crypt.h>
 
-#define RERUN_BEFORE_SENDING_TO_SERVER 1
-#define READY_TO_SEND_TO_SERVER 0
+static void EncryptPassword(char* _pass)
+{
+	int hash = 5381;
+	int c;
+
+	while (c = *(_pass++))
+	hash = ((hash << 5) + hash) + c; 
+
+	hash *= 1234567;
+
+	sprintf(_pass, "%d", hash);
+}
+
+static void GetMenuOption(UserChoice* _choice)
+{
+	unsigned int num;
+
+	printf("1. Logout\n2. Delete user\n3. Create new group\n4. Delete group\n5. Join group\n6. Leave group\n7. Start chat\n8. Save DB\n9. Print out all groups\n10. Print out all users\n");
+	scanf("%u", &num);
+	
+	while(num < 1 || num > 10)
+	{
+		printf("Invalid choice. Try again...\n");
+		scanf("%u", &num);
+	}
+	
+	num += 2;
+
+	*_choice = (UserChoice) num;
+}
+
+static void GetUsernameAndPass(char* _username, char* _pass)
+{
+	printf("Enter username:\n");
+	scanf("%s", _username);
+	printf("Enter password:\n");
+	scanf("%s", _pass);
+	EncryptPassword(_pass);
+}
+
+static void GetGroupName(char* _groupname)
+{
+	printf("Enter group name\n");
+	scanf("%s", _groupname);
+}
+
+static void StartUpMenu(UserChoice* _choice)
+{
+	unsigned int num;
+
+	printf("1. Register\n2. Login\n");
+	scanf("%u", &num);
+	
+	while(num < 1 || num >2)
+	{
+		printf("Invalid choice... Try again.\n");
+		scanf("%u", &num);
+	}
+	
+	*_choice = (UserChoice) num;
+}
 
 /*----API functions defenitions------*/
 int RunUserInterface(UserInterface* _userInterface)
 {	
+	int runAgain = (_userInterface->m_choice >= REGISTER && _userInterface->m_choice <= PRINT_OUT_USERS) ? 0 : 1;
+
 	switch(_userInterface->m_choice)
 	{
 		case STARTUP:
-			printf("1. Register\n2. Login\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			StartUpMenu(&_userInterface->m_choice);
 			break;
+
 		case REGISTER:
-			printf("Enter username:\n");
-			scanf("%s", (char*)&_userInterface->m_username);
-			printf("Enter password:\n");
-			scanf("%s", (char*)&_userInterface->m_password);
-			return READY_TO_SEND_TO_SERVER;
-			break;
 		case LOGIN:
-			printf("Enter username:\n");
-			scanf("%s", (char*)&_userInterface->m_username);
-			printf("Enter password:\n");
-			scanf("%s", (char*)&_userInterface->m_password);
-			return READY_TO_SEND_TO_SERVER;
+			GetUsernameAndPass(_userInterface->m_username, _userInterface->m_password);
 			break;
+
 		case LOGOUT:
 			_userInterface->m_choice = LOGOUT;
-			return READY_TO_SEND_TO_SERVER;
 			break;
+
 		case DELETE_USER:
 			_userInterface->m_choice = DELETE_USER;
-			return READY_TO_SEND_TO_SERVER;
 			break;
+
 		case CREATE_GROUP:
-			printf("Enter group name\n");
-			scanf("%s", (char*)_userInterface->m_groupname);
-			return READY_TO_SEND_TO_SERVER;
-			break;
 		case DELETE_GROUP:
-			printf("Enter group name\n");
-			scanf("%s", (char*)_userInterface->m_groupname);
-			return READY_TO_SEND_TO_SERVER;
-			break;
 		case JOIN_GROUP:
-			printf("Enter group name\n");
-			scanf("%s", (char*)_userInterface->m_groupname);
-			return READY_TO_SEND_TO_SERVER;
-			break;
 		case LEAVE_GROUP:
-			printf("Enter group name\n");
-			scanf("%s", (char*)_userInterface->m_groupname);
-			return READY_TO_SEND_TO_SERVER;
-			break;
 		case START_CHAT:
-			printf("Enter group name:\n");
-			scanf("%s", (char*)_userInterface->m_groupname);
-			return READY_TO_SEND_TO_SERVER;
+			GetGroupName(_userInterface->m_groupname);
 			break;
+
 		case SAVE_DB:
-			return READY_TO_SEND_TO_SERVER;
-			break;
 		case PRINT_OUT_GROUPS:
-			return READY_TO_SEND_TO_SERVER;
-			break;
 		case PRINT_OUT_USERS:
-			return READY_TO_SEND_TO_SERVER;
 			break;
+
 		case REGISTER_SUCCESS:
 			printf("Registered successfully!\n");
 			_userInterface->m_choice = STARTUP;
-			return RERUN_BEFORE_SENDING_TO_SERVER;
 			break;
 		case REGISTER_FAIL:
 			printf("Registered failed!\n");
 			_userInterface->m_choice = STARTUP;
-			return RERUN_BEFORE_SENDING_TO_SERVER;
 			break;
 		case LOGIN_SUCCESS:
 			printf("Logged in successfully!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case LOGIN_FAIL:
 			printf("Login failed!\n");
 			_userInterface->m_choice = STARTUP;
-			return RERUN_BEFORE_SENDING_TO_SERVER;
 			break;
 		case LOGOUT_SUCCESS:
 			printf("Logged out successfully!\n");
 			_userInterface->m_choice = STARTUP;
-			return RERUN_BEFORE_SENDING_TO_SERVER;
 			break;
 		case DELETE_SUCCESS:
 			printf("Deleted successfully!\n");
 			_userInterface->m_choice = STARTUP;
-			return RERUN_BEFORE_SENDING_TO_SERVER;
 			break;
 		case GROUP_CREATE_SUCCESS:
 			printf("Group created successfully!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case GROUP_CREATE_FAILURE:
 			printf("Failed to create group!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case GROUP_JOIN_SUCCESS:
 			printf("Joined group successfully!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case GROUP_JOIN_FAILURE:
 			printf("Failed to join group!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case GROUP_LEAVE_SUCCESS:
 			printf("Group left successfully!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case GROUP_LEAVE_FAILURE:
 			printf("Failed to leave group!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case GROUP_DELETE_SUCCESS:
 			printf("Group deleted successfully!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case GROUP_DELETE_FAILURE:
 			printf("Failed to delete group!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case START_CHAT_SUCCESS:
 			printf("Chat started successfully!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case START_CHAT_FAILURE:
 			printf("Unable start chat!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case SAVE_DB_SUCCESS:
 			printf("Saved successfully!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case SAVE_DB_FAILURE:
 			printf("Unable to save!\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case PRINT_OUT_GROUPS_SUCCESS:
 			printf("Groups:\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case PRINT_OUT_USERS_SUCCESS:
 			printf("Users:\n");
-			printf("3. Logout\n4. Delete user\n5. Create new group\n6. Delete group\n7. Join group\n8. Leave group\n9. Start chat\n10. Save DB\n11. Print out all groups\n12. Print out all users\n");
-			scanf("%u", (unsigned int*)&_userInterface->m_choice);
-			return RERUN_BEFORE_SENDING_TO_SERVER;
+			GetMenuOption(&_userInterface->m_choice);
 			break;
 	}
+	
+	return runAgain;
 }
 
 

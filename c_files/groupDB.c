@@ -261,7 +261,7 @@ ChatRes GroupDB_Save(GroupDB_t* _groupDB, UserInterface* _ui)
 		return FAILURE;
 	}
 		
-	HashMap_ForEach(_groupDB->m_groups, (KeyValueActionFunction) SerizlizeItem, NULL);
+	HashMap_ForEach(_groupDB->m_groups, (KeyValueActionFunction) SerizlizeItem, fp);
 
 	fclose(fp);
 

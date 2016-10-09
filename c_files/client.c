@@ -20,8 +20,6 @@ SocketDesc InitializeConnectionWithTCPserver(ConfigStruct* _configStruct)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");
 	
-	printf("InitializeConnectionWithTCPserver\n");
-	
 	if((socketDesc = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 	{
 		ZLOG_SEND(errorZlog, LOG_ERROR, "Couldn't open socket, %d",1);

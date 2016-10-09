@@ -28,6 +28,16 @@ static void sHandler(int _sigNum, siginfo_t* _sigInfo, char* _sigContext)
 	close(soc);
 }
 
+static void DecryptCesarCypher(char* _str)
+{
+	int i, n = strlen(_str);
+
+	for(i = 0; i < n; ++i)
+	{
+		_str[i] -= 15;
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	char* username;
@@ -105,6 +115,7 @@ int main(int argc, char* argv[])
 	while(g_isAlive)
 	{
 		recvfrom(soc, msg, sizeof(msg), 0, (struct sockaddr*) &fromAddr, &addrLen);
+		DecryptCesarCypher(msg);
 		printf("%s\n", msg);
 	}
 	

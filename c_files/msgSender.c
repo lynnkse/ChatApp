@@ -29,6 +29,16 @@ static void sHandler(int _sigNum, siginfo_t* _sigInfo, char* _sigContext)
 	close(soc);
 }
 
+static void EncryptCesarCypher(char* _str)
+{
+	int i, n = strlen(_str);
+
+	for(i = 0; i < n; ++i)
+	{
+		_str[i] += 15;
+	}
+}
+
 int main(int argc, char* argv[]) 
 {
 	char* multicastIP;
@@ -79,6 +89,7 @@ int main(int argc, char* argv[])
 	{
 		sprintf(msg, "%s: ", username);		
 		fgets(msg + strlen(username) + 2, MAX_LEN, stdin);
+		EncryptCesarCypher(msg);
 		res = sendto(soc, msg, strlen(msg) + 1, 0, (struct sockaddr *) &addr, sizeof(addr));
 	}
 	

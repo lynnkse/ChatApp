@@ -7,7 +7,7 @@ SRV_OBJS = server.o serverManager.o DBmanager.o userDB.o groupDB.o
 
 .PHONY: clean
 
-
+rebuild : client server msgSender msgReceiver
 
 client : $(CLT_OBJS)
 	$(CC) -o client $(CLT_OBJS) -L./lib -lds -llogger

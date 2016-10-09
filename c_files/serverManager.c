@@ -187,10 +187,7 @@ static ChatRes RergisterNewUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Registering new user, %d",1);
-		printf("Registering new user\n");
-	#endif
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Registering new user, %d",1);
 
 	return DBman_RergisterNewUser(_DBmanager, _ui); 
 }
@@ -203,10 +200,9 @@ static ChatRes DeleteUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Deleting user, %d",1);
-		printf("Deleting user\n");
-	#endif
+
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Deleting user, %d",1);
+
 
 	return DBman_DeleteUser(_DBmanager, _ui);
 }
@@ -219,10 +215,8 @@ static ChatRes LoginExistingUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Logging in new user, %d",1);
-		printf("Logging in new user\n");
-	#endif
+
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Logging in new user, %d",1);
 
 	return DBman_LookUpUser(_DBmanager, _ui);
 }
@@ -251,10 +245,8 @@ static ChatRes CreateNewGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Creating new group, %d",1);
-		printf("Creating new group\n");
-	#endif
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Creating new group, %d",1);
+
 
 	return DBman_CreateNewGroup(_DBmanager, _ui);
 }
@@ -267,10 +259,8 @@ static ChatRes DeleteGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Deleting group, %d",1);
-		printf("Deleting group\n");
-	#endif
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Deleting group, %d",1);
+
 
 	return DBman_DeleteGroup(_DBmanager, _ui);
 }
@@ -283,10 +273,9 @@ static ChatRes JoinGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Joining group, %d",1);
-		printf("Joining group\n");
-	#endif
+
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Joining group, %d",1);
+
 
 	return DBman_UserJoinGroup(_DBmanager, _ui);
 }
@@ -299,10 +288,8 @@ static ChatRes LeaveGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Leaving group, %d",1);
-		printf("Leaving group\n");
-	#endif
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Leaving group, %d",1);
+
 	
 	return DBman_UserLeaveGroup(_DBmanager, _ui);
 }
@@ -315,10 +302,8 @@ static ChatRes BanUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Banning user, %d",1);
-		printf("Banning user\n");
-	#endif
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Banning user, %d",1);
+
 
 	return DBman_BanUser(_DBmanager, _ui);
 }
@@ -331,10 +316,7 @@ static ChatRes UnBanUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Unbanning user, %d",1);
-		printf("Unbanning user\n");
-	#endif
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Unbanning user, %d",1);
 
 	return DBman_UnBanUser(_DBmanager, _ui);
 }
@@ -347,10 +329,7 @@ static ChatRes BanFromGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Banning user from group, %d",1);
-		printf("Banning user from group\n");
-	#endif
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Banning user from group, %d",1);
 
 	return SUCCESS;
 }
@@ -363,10 +342,7 @@ static ChatRes UnBanFromGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Unbanning user from group, %d",1);
-		printf("Unbanning user from group\n");
-	#endif
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Unbanning user from group, %d",1);
 
 	return SUCCESS;
 }
@@ -379,10 +355,7 @@ static ChatRes LogoutUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");	
 
-	#ifndef NDEBUG
-		ZLOG_SEND(traceZlog, LOG_TRACE, "Logging out user, %d",1);
-		printf("Logging out user\n");
-	#endif
+	ZLOG_SEND(traceZlog, LOG_TRACE, "Logging out user, %d",1);
 
 	return DBman_LogoutUser(_DBmanager, _ui);
 }
