@@ -42,7 +42,7 @@ groupDB.o : c_files/groupDB.c inc/groupDB.h inc/logmngr.h inc/internal.h inc/Has
 	$(CC) $(CFLAGS) c_files/groupDB.c
 	
 msgReceiver : msgReceiver.o
-	$(CC) -o msgReceiver msgReceiver.o -L./lib -llogger
+	$(CC) -o msgReceiver msgReceiver.o -L./lib -llogger -lds
 
 msgReceiver.o : c_files/msgReceiver.c inc/internal.h inc/logmngr.h
 	$(CC) $(CFLAGS) c_files/msgReceiver.c
@@ -50,7 +50,7 @@ msgReceiver.o : c_files/msgReceiver.c inc/internal.h inc/logmngr.h
 
 
 msgSender : msgSender.o
-	$(CC) -o msgSender msgSender.o -L./lib -llogger
+	$(CC) -o msgSender msgSender.o -L./lib -llogger -lds
 
 msgSender.o : c_files/msgSender.c inc/internal.h inc/logmngr.h
 	$(CC) $(CFLAGS) c_files/msgSender.c

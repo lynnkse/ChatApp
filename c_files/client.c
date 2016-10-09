@@ -83,7 +83,7 @@ ChatRes ReceiveMessage(int _fd, void* _payload, size_t _payloadSize)
 	
 	if(numOfBytesRead > 0)
 	{
-		ZLOG_SEND(traceZlog, LOG_TRACE, "%d bytes read", numOfBytesRead);
+		ZLOG_SEND(traceZlog, LOG_TRACE, "%d bytes read", (int)numOfBytesRead);
 	}
 	else 
 	{

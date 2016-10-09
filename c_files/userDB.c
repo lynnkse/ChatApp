@@ -6,6 +6,7 @@
 
 #define MAX_USERNAME_LENGTH 32
 #define MAX_PASSWORD_LENGTH 32
+#define SERIALIZATION_FILE "serialization_users"
 
 struct UserDB_t
 {
@@ -25,6 +26,9 @@ struct User_t
 static int HashFunc(char *str);
 static int IsKeysEqual(char* _key1, char* _key2);
 static void DestroyVal(void* _val);
+static int SerizlizeItem(void* _key, void* _value, FILE* _fp);
+static void ReadUserDBfromFile(HashMap* _map, FILE* _fp);
+static int PrintOutName(void* _key, User_t* _user, void* _context);
 
 /*---API functions defenition---*/
 UserDB_t* CreateUserDB(size_t _cap)
@@ -32,6 +36,7 @@ UserDB_t* CreateUserDB(size_t _cap)
 	Zlog* traceZlog;
 	Zlog* errorZlog;
 	UserDB_t* userDB;
+	FILE* fp = NULL;
 
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");
@@ -49,6 +54,13 @@ UserDB_t* CreateUserDB(size_t _cap)
 		ZLOG_SEND(errorZlog, LOG_ERROR, "Failed to create users HashMap, %d",1);
 		free(userDB);
 		return NULL;
+	}
+
+	fp = fopen(SERIALIZATION_FILE, "r");
+	if(fp)
+	{
+		ReadUserDBfromFile(userDB->m_users, fp);
+		fclose(fp);
 	}
 
 	ZLOG_SEND(traceZlog, LOG_TRACE, "User DB was created, %d",1);
@@ -230,7 +242,60 @@ ChatRes DB_LogoutUser(UserDB_t* _userDB, UserInterface* _ui)/*logout failure sho
 	}	
 }
 
+ChatRes DB_Save(UserDB_t* _userDB, UserInterface* _ui)
+{
+	FILE* fp;
+	ZLOGS_INITIALIZATION;
+
+	fp = fopen(SERIALIZATION_FILE, "w");
+	if(!fp)
+	{
+		ZLOG_SEND(errorZlog, LOG_ERROR, "Unable to open file for serialization, %d",1);
+		_ui->m_choice = SAVE_DB_FAILURE;
+		return FAILURE;
+	}
+		
+	HashMap_ForEach(_userDB->m_users, (KeyValueActionFunction) SerizlizeItem, (void*) fp);
+
+	fclose(fp);
+	
+	_ui->m_choice = SAVE_DB_SUCCESS;
+
+	return SUCCESS;
+}
+
+ChatRes DB_PrintOutUsers(UserDB_t* _userDB, UserInterface* _ui)
+{
+	HashMap_ForEach(_userDB->m_users, (KeyValueActionFunction) PrintOutName, NULL);
+	_ui->m_choice = PRINT_OUT_USERS_SUCCESS;
+	return SUCCESS;
+}
+
 /*---Static functions definitions---*/
+static int PrintOutName(void* _key, User_t* _user, void* _context)
+{
+	printf("%s\n", _user->m_username);
+	return 1;
+}
+
+static void ReadUserDBfromFile(HashMap* _map, FILE* _fp)
+{
+	User_t* user = (User_t*) malloc(sizeof(User_t));	
+	size_t res = 0;	
+	/*TODO change to read the whole file at once*/
+	do
+	{
+		res = fread(user, sizeof(User_t), 1, _fp);
+		HashMap_Insert(_map, user->m_username, user);
+	}
+	while(res);
+}
+
+static int SerizlizeItem(void* _key, void* _value, FILE* _fp)
+{
+	fwrite(_value, sizeof(User_t), 1, _fp);
+	return 1;
+}
 
 static int HashFunc(char *str)
 {

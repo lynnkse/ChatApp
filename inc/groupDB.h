@@ -15,5 +15,7 @@ ChatRes GroupDB_DeleteGroup(GroupDB_t* _groupDB, UserInterface* _ui);
 ChatRes GroupDB_UserJoinGroup(GroupDB_t* _groupDB, UserInterface* _ui); 
 ChatRes GroupDB_UserLeaveGroup(GroupDB_t* _groupDB, UserInterface* _ui); 
 ChatRes GroupDB_StartChat(GroupDB_t* _groupDB, UserInterface* _ui); 
+ChatRes GroupDB_Save(GroupDB_t* _groupDB, UserInterface* _ui); 
+ChatRes GroupDB_PrintOutGroups(GroupDB_t* _groupDB, UserInterface* _ui); 
 
 #endif

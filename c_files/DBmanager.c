@@ -82,6 +82,11 @@ ChatRes DBman_LogoutUser(DBmanager_t* _DBmanager, UserInterface* _ui)
 	return DB_LogoutUser(_DBmanager->m_userDB, _ui);
 }
 
+ChatRes DBman_PrintOutUsers(DBmanager_t* _DBmanager, UserInterface* _ui)
+{
+	return DB_PrintOutUsers(_DBmanager->m_userDB, _ui);
+}
+
 ChatRes DBman_CreateNewGroup(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	return GroupDB_CreateNewGroup(_DBmanager->m_groupDB, _ui);
@@ -106,6 +111,17 @@ ChatRes DBman_StartChat(DBmanager_t* _DBmanager, UserInterface* _ui)
 {
 	return GroupDB_StartChat(_DBmanager->m_groupDB, _ui);
 }
+
+ChatRes DBman_Save(DBmanager_t* _DBmanager, UserInterface* _ui)
+{
+	return ((GroupDB_Save(_DBmanager->m_groupDB, _ui) == SUCCESS) && (DB_Save(_DBmanager->m_userDB, _ui) == SUCCESS)) == 1 ? SUCCESS : FAILURE;
+}
+
+ChatRes DBman_PrintOutGroups(DBmanager_t* _DBmanager, UserInterface* _ui)
+{
+	return GroupDB_PrintOutGroups(_DBmanager->m_groupDB, _ui);
+}
+
 
 
 

@@ -10,29 +10,46 @@
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <errno.h>
+#include <signal.h>
 
 #define LOG_CONFIG_FILE "log_config"
 #define PORT 2222
 #define TTL 1
 #define MAX_LEN 128
 
-int main(int argc, char* argv[]) /*arguments: IP, username*/
+int soc;
+int g_isAlive = 1;
+
+static void sHandler(int _sigNum, siginfo_t* _sigInfo, char* _sigContext)
+{
+	Zlog* zlog;
+	zlog = ZlogGet("trace");
+	ZLOG_SEND(zlog, LOG_TRACE, "Message sender stopped by user %d", 1);
+	g_isAlive = 0;
+	close(soc);
+}
+
+int main(int argc, char* argv[]) 
 {
 	char* multicastIP;
 	char* username;
 	int port;
-	int soc;
 	int res;
 	struct sockaddr_in addr; 
 	u_char ttl = TTL;
 	char msg[128];
 	Zlog* traceZlog;
 	Zlog* errorZlog;
-	
+	struct sigaction sAction;	
+
 	ZlogInit(LOG_CONFIG_FILE);
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");
 	
+	sAction.sa_sigaction = (void(*)(int, siginfo_t*, void*))sHandler;
+	sAction.sa_flags = SA_SIGINFO;
+	sigaction(SIGINT, &sAction, NULL);
+
 	soc = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if(soc == ERROR)
 	{
@@ -58,13 +75,10 @@ int main(int argc, char* argv[]) /*arguments: IP, username*/
 	addr.sin_addr.s_addr = inet_addr(multicastIP);
 	addr.sin_port = htons(port);
 	
-	while(1)
+	while(g_isAlive)
 	{
-		fgets(msg, MAX_LEN, stdin);
-		/*snprintf(msgToSend, MAX_LEN+NAME_LENGTH, "%s|%s", name, getSendString);
-		sendLen = strlen(getSendString);
-		/*scanf("%s", getSendString);*/
-	
+		sprintf(msg, "%s: ", username);		
+		fgets(msg + strlen(username) + 2, MAX_LEN, stdin);
 		res = sendto(soc, msg, strlen(msg) + 1, 0, (struct sockaddr *) &addr, sizeof(addr));
 	}
 	

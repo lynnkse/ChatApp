@@ -14,12 +14,15 @@ ChatRes DBman_BanUser(DBmanager_t* _DBmanager, UserInterface* _ui);
 ChatRes DBman_UnBanUser(DBmanager_t* _DBmanager, UserInterface* _ui); 
 ChatRes DBman_LookUpUser(DBmanager_t* _DBmanager, UserInterface* _ui);
 ChatRes DBman_LogoutUser(DBmanager_t* _DBmanager, UserInterface* _ui);
+ChatRes DBman_PrintOutUsers(DBmanager_t* _DBmanager, UserInterface* _ui);
 
 ChatRes DBman_CreateNewGroup(DBmanager_t* _DBmanager, UserInterface* _ui);
 ChatRes DBman_DeleteGroup(DBmanager_t* _DBmanager, UserInterface* _ui);
 ChatRes DBman_UserJoinGroup(DBmanager_t* _DBmanager, UserInterface* _ui);
 ChatRes DBman_UserLeaveGroup(DBmanager_t* _DBmanager, UserInterface* _ui);
+ChatRes DBman_PrintOutGroups(DBmanager_t* _DBmanager, UserInterface* _ui);
 
 ChatRes DBman_StartChat(DBmanager_t* _DBmanager, UserInterface* _ui);
+ChatRes DBman_Save(DBmanager_t* _DBmanager, UserInterface* _ui);
 
 #endif

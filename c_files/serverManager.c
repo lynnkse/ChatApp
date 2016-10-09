@@ -29,6 +29,9 @@ static ChatRes UnBanFromGroup(DBmanager_t* _DBmanager, UserInterface* _ui);
 static ChatRes LogoutUser(DBmanager_t* _DBmanager, UserInterface* _ui);
 static ChatRes LeaveGroup(DBmanager_t* _DBmanager, UserInterface* _ui);
 static ChatRes StartChat(DBmanager_t* _DBmanager, UserInterface* _ui);
+static ChatRes SaveDB(DBmanager_t* _DBmanager, UserInterface* _ui);
+static ChatRes PrintOutGroups(DBmanager_t* _DBmanager, UserInterface* _ui);
+static ChatRes PrintOutUsers(DBmanager_t* _DBmanager, UserInterface* _ui);
 static void ProcessMessage(UserInterface* _ui, void* _context);
 static void* OnNewConnection(void* _arg1, void* _arg2);
 void* OnDisconnect(void* _arg1, void* _arg2);
@@ -104,7 +107,7 @@ ChatRes OperateServer(ServerManager_t* _serverManager)
 /*---Static functions defenitions---*/
 static void ProcessMessage(UserInterface* _ui, void* _context)
 {
-	ChatRes (*userFunctions[13])(DBmanager_t* _DBmanager, UserInterface* _ui) = {RergisterNewUser, LoginExistingUser, LogoutUser, DeleteUser, CreateNewGroup, DeleteGroup, JoinGroup, LeaveGroup, StartChat, BanUser, UnBanUser, BanFromGroup, UnBanFromGroup};
+	ChatRes (*userFunctions[16])(DBmanager_t* _DBmanager, UserInterface* _ui) = {RergisterNewUser, LoginExistingUser, LogoutUser, DeleteUser, CreateNewGroup, DeleteGroup, JoinGroup, LeaveGroup, StartChat, SaveDB, PrintOutGroups, PrintOutUsers, BanUser, UnBanUser, BanFromGroup, UnBanFromGroup};
 
 	_ui->m_result = userFunctions[(int)_ui->m_choice - 1](GetServerManager((Server_t*)_context)->m_DBmanager, _ui);
 	
@@ -129,6 +132,51 @@ void* OnNewConnection(void* _arg1, void* _arg2)
 void* OnDisconnect(void* _arg1, void* _arg2)
 {
 	return NULL;
+}
+
+static ChatRes PrintOutGroups(DBmanager_t* _DBmanager, UserInterface* _ui)
+{
+	Zlog* traceZlog;
+	Zlog* errorZlog;
+
+	traceZlog = ZlogGet("trace");
+	errorZlog = ZlogGet("error");	
+
+	#ifndef NDEBUG
+		ZLOG_SEND(traceZlog, LOG_TRACE, "Saving DB on disk, %d",1);
+	#endif
+
+	return DBman_PrintOutGroups(_DBmanager, _ui); 
+}
+
+static ChatRes PrintOutUsers(DBmanager_t* _DBmanager, UserInterface* _ui)
+{
+	Zlog* traceZlog;
+	Zlog* errorZlog;
+
+	traceZlog = ZlogGet("trace");
+	errorZlog = ZlogGet("error");	
+
+	#ifndef NDEBUG
+		ZLOG_SEND(traceZlog, LOG_TRACE, "Saving DB on disk, %d",1);
+	#endif
+
+	return DBman_PrintOutUsers(_DBmanager, _ui); 
+}
+
+static ChatRes SaveDB(DBmanager_t* _DBmanager, UserInterface* _ui)
+{
+	Zlog* traceZlog;
+	Zlog* errorZlog;
+
+	traceZlog = ZlogGet("trace");
+	errorZlog = ZlogGet("error");	
+
+	#ifndef NDEBUG
+		ZLOG_SEND(traceZlog, LOG_TRACE, "Saving DB on disk, %d",1);
+	#endif
+
+	return DBman_Save(_DBmanager, _ui); 
 }
 
 static ChatRes RergisterNewUser(DBmanager_t* _DBmanager, UserInterface* _ui)

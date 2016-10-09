@@ -3,11 +3,13 @@
 #include "../inc/clientManager.h"
 #include "../inc/client.h"
 #include "../inc/logmngr.h"
+#include "../inc/read_config.h"
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #define STDIN_FD 0
 #define LOG_CONFIG_FILE "log_config"
@@ -17,55 +19,53 @@
 #define PORT_USED 2222
 #define DATA_BUFF_SIZE 512
 
+#define CONFIG_FILE "client_config"
+
 struct ClientManager_t
 {
 	SocketDesc m_socketDesc;
 	int m_userInputFD;
 };
 
-int g_isAlive = 1;
+ClientManager_t* clientManager;
 
 /*-------Static Funcs Declarations-----*/
 
 static ConfigStruct* ReadConfigFile();
 static void StartChat(UserInterface* _ui);
+static void sHandler(int _sigNum, siginfo_t* _sigInfo, char* _sigContext);
 
 /*-----API functions definitions-------*/
-ClientManager_t* CreateClientManager()
+void CreateClientManager()
 {
-	ClientManager_t* clientManager;
 	ConfigStruct* configStruct = NULL;
 	
 	clientManager = (ClientManager_t*) malloc(sizeof(ClientManager_t));
 	if(!clientManager)
 	{
-		return NULL;
+		return;
 	}
 	
 	configStruct = ReadConfigFile();
 	if(!configStruct)
 	{
 		free(clientManager);
-		return NULL;
+		return;
 	}
 	
 	if((clientManager->m_socketDesc = InitializeConnectionWithTCPserver(configStruct)) == ERROR)
 	{
 		free(clientManager);
 		free(configStruct);
-		return NULL;
+		return;
 	}
 	
 	clientManager->m_userInputFD = STDIN_FD;
 	free(configStruct);
-	
-	return clientManager;
 }
 
 void OperateClient()
 {
-	
-	ClientManager_t* clientManager;
 	UserInterface userInterface;
 	void* dataBuffer;
 
@@ -73,7 +73,7 @@ void OperateClient()
 
 	dataBuffer = malloc(DATA_BUFF_SIZE);
 
-	clientManager = CreateClientManager();
+	CreateClientManager();
 	if(!clientManager)
 	{
 		ZLOG_SEND(errorZlog, LOG_ERROR, "Couldn't create client manager, %d", 1);
@@ -81,25 +81,25 @@ void OperateClient()
 	}
 	
 	/*get greeting message from server*/
-	ReceiveMessage(clientManager->m_socketDesc, (void*) dataBuffer, sizeof(dataBuffer));
-	
+	ReceiveMessage(clientManager->m_socketDesc, (void*) dataBuffer, sizeof(userInterface));
+	printf("%s\n", (char*) dataBuffer);
+
 	/*set user interface in initial state*/
 	userInterface.m_choice = STARTUP;
 	
 	while(RunUserInterface(&userInterface))
 	{}
-	printf("91\n");
 	
-	while(g_isAlive)
+	while(1)
 	{		
 		SendMessage(clientManager->m_socketDesc, &userInterface, sizeof(userInterface));
 		ReceiveMessage(clientManager->m_socketDesc, (void*) &userInterface, sizeof(userInterface));
-		
+
 		if(userInterface.m_choice == START_CHAT_SUCCESS)
 		{
 			StartChat(&userInterface);
 		}
-		printf("102\n");
+
 		do
 		{}
 		while(RunUserInterface(&userInterface));
@@ -123,17 +123,29 @@ int main()
 static ConfigStruct* ReadConfigFile()
 {
 	ConfigStruct* configStruct;
+	Config* configs;
+	HashMap* configMap;
+	char* sBuffSize;
+	char* IP;
+	char* sPort;
 	
 	configStruct = (ConfigStruct*) malloc(sizeof(ConfigStruct));
 	if(NULL == configStruct)
 	{
 		return NULL;
 	}
+
+	configs = ReadConfig(CONFIG_FILE);
+	configMap = GetNextConfig(configs);	
+	HashMap_Remove(configMap, "BuffSize", (void**) &sBuffSize);
+	HashMap_Remove(configMap, "IP", (void**) &IP);
+	HashMap_Remove(configMap, "Port", (void**) &sPort);
+
 	
-	/*hardcoded*/
-	configStruct->m_IPaddress = "127.0.0.1";
-	configStruct->m_port = 1351;
-	/*---------*/
+	configStruct->m_IPaddress = IP;
+	configStruct->m_port = atoi(sPort);
+	configStruct->m_buffSize = (size_t) atoi(sBuffSize);
+
 	
 	return configStruct;
 }
@@ -159,6 +171,7 @@ static void StartChat(UserInterface* _ui)
 		}
 	}
 }
+
 
 
 

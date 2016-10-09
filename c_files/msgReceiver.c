@@ -9,19 +9,30 @@
 #include "../inc/logmngr.h"
 #include <netinet/in.h>
 #include <fcntl.h>
-
+#include <signal.h>
 
 
 #define LOG_CONFIG_FILE "log_config"
 #define PORT 2222
 #define MSG_LEN 1024
 
-int main(int argc, char* argv[])/*argument: IP*/
+int g_isAlive = 1;
+int soc;
+
+static void sHandler(int _sigNum, siginfo_t* _sigInfo, char* _sigContext)
+{
+	Zlog* zlog;
+	zlog = ZlogGet("trace");
+	ZLOG_SEND(zlog, LOG_TRACE, "Message receiver stopped by user %d", 1);
+	g_isAlive = 0;
+	close(soc);
+}
+
+int main(int argc, char* argv[])
 {
 	char* username;
 	char* multicastIP;
 	int port;
-	int soc;
 	int optVal = 1;
 	int res;
 	struct sockaddr_in addr; 
@@ -31,11 +42,16 @@ int main(int argc, char* argv[])/*argument: IP*/
 	struct sockaddr_in fromAddr;
 	Zlog* traceZlog;
 	Zlog* errorZlog;
+	struct sigaction sAction;	
 	
 	ZlogInit(LOG_CONFIG_FILE);
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");
 	
+	sAction.sa_sigaction = (void(*)(int, siginfo_t*, void*))sHandler;
+	sAction.sa_flags = SA_SIGINFO;
+	sigaction(SIGINT, &sAction, NULL);
+
 	multicastIP = argv[1];
 	port = atoi(argv[2]);
 	
@@ -57,7 +73,7 @@ int main(int argc, char* argv[])/*argument: IP*/
 	
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family      = AF_INET;
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	addr.sin_addr.s_addr = inet_addr(multicastIP);
 	addr.sin_port        = htons(port);
 	
 	res = bind(soc, (struct sockaddr*)&addr, sizeof(addr));
@@ -84,12 +100,11 @@ int main(int argc, char* argv[])/*argument: IP*/
 	addrLen = sizeof(fromAddr);	
 	memset(&fromAddr, 0, addrLen);
 	
-	printf("I'm receiver\n");
+	printf("Receiver\n");
 	
-	while(1)
+	while(g_isAlive)
 	{
 		recvfrom(soc, msg, sizeof(msg), 0, (struct sockaddr*) &fromAddr, &addrLen);
-		/*read(soc,  msg,  sizeof(msg));*/
 		printf("%s\n", msg);
 	}
 	

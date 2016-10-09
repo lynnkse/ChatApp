@@ -62,28 +62,6 @@ static void sHandler(int _sigNum, siginfo_t* _sigInfo, char* _sigContext)
 	g_isAlive = 0;
 }
 
-/*static int DeleteDeadConnection(const void* _key, Connection_t* _connection, Server_t* _server)
-{
-	time_t currTime;
-	Zlog* zlog;
-	Connection_t* connection = NULL;
-
-	zlog = ZlogGet("trace");
-	
-	printf("Diff = %d\n", (int) difftime(currTime, _connection->m_time));
-
-	time(&currTime);	
-	if(difftime(currTime, _connection->m_time) >= TIMEOUT)
-	{
-		HashMap_Remove(_server->m_clientSockets, _key, (void**) &connection);
-		close(connection->m_socket);
-		free(connection);
-		ZLOG_SEND(zlog, LOG_TRACE, "Dead connection has been deleted %d", 1);
-	}
-
-	return 1;
-}*/
-
 static void SaveNewClientSocket(Server_t* _server)
 {
 	
@@ -222,8 +200,6 @@ Server_t* ServerCreate(ServerArguments _arguments)
 	server->m_maxNumOfClients = atoi(sMaxNumOfClients);
 	server->m_timeout = atoi(sTimeout);
 	server->m_serverManager = _arguments.m_serverManager;
-	
-	printf("Before. Server IP: %s, Port: %d\n", server->m_IP, server->m_port);
 
 	server->m_clientSockets = HashMap_Create(server->m_maxNumOfClients, (HashFunction) HashFunc, (EqualityFunction) KeyEq);
 	
@@ -244,13 +220,11 @@ Server_t* ServerCreate(ServerArguments _arguments)
 	}
 	
 	server->m_maxSocket = server->m_serverSocket;
-	
-	printf("Middle. Server IP: %s, Port: %d\n", server->m_IP, server->m_port);
+
 	
 	server->m_serverAddr.sin_family = AF_INET;
 	server->m_serverAddr.sin_port = htons(server->m_port);
-	inet_aton(/*"127.0.0.1"*/server->m_IP, &server->m_serverAddr.sin_addr);
-	printf("After. Server IP: %s, Port: %d\n", server->m_IP, server->m_port);
+	server->m_serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	
 	memset(server->m_serverAddr.sin_zero, 0, sizeof(server->m_serverAddr.sin_zero));
 	
