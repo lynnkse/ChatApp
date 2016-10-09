@@ -250,19 +250,22 @@ ChatRes GroupDB_StartChat(GroupDB_t* _groupDB, UserInterface* _ui)
 
 ChatRes GroupDB_Save(GroupDB_t* _groupDB, UserInterface* _ui)
 {
-	FILE* fp;
+	FILE* fp = NULL;
 	ZLOGS_INITIALIZATION;
 
 	fp = fopen(SERIALIZATION_FILE, "w");
 	if(!fp)
 	{
 		ZLOG_SEND(errorZlog, LOG_ERROR, "Unable to open file for serialization, %d",1);
+		_ui->m_choice = SAVE_DB_FAILURE;
 		return FAILURE;
 	}
 		
 	HashMap_ForEach(_groupDB->m_groups, (KeyValueActionFunction) SerizlizeItem, NULL);
 
 	fclose(fp);
+
+	_ui->m_choice = SAVE_DB_SUCCESS;
 
 	return SUCCESS;
 }
@@ -277,12 +280,27 @@ ChatRes GroupDB_PrintOutGroups(GroupDB_t* _groupDB, UserInterface* _ui)
 /*---Static functions definitions---*/
 static void ReadDBfromFile(HashMap* _map, FILE* _fp)
 {
-	Group_t* group = (Group_t*) malloc(sizeof(Group_t));	
+	Group_t* group; 
 	size_t res = 0;	
+	int numOfMembers, memberIndex;
+	char* username;
 
 	do
 	{
+		group = (Group_t*) malloc(sizeof(Group_t));		
+		username = (char*) malloc(MAX_USERNAME_LENGTH);
+
 		res = fread(group, sizeof(Group_t), 1, _fp);
+
+		group->m_members = List_Create();
+
+		fread(&numOfMembers, sizeof(size_t), 1, _fp);
+		for(memberIndex = 0; memberIndex < numOfMembers; ++memberIndex)
+		{
+			fread(username, MAX_USERNAME_LENGTH, 1, _fp);
+			List_PushHead(group->m_members, username);
+		}
+	
 		HashMap_Insert(_map, group->m_groupname, group);
 	}
 	while(res);
@@ -298,7 +316,7 @@ static int SerizlizeItem(void* _key, Group_t* _value, FILE* _fp)
 {
 	ListItr begin;
 	ListItr end;
-	size_t size = List_Size(_value->m_members);
+	int size = (int) List_Size(_value->m_members);
 	
 	fwrite(_value, sizeof(Group_t), 1, _fp);
 	fwrite(&size, sizeof(size_t), 1, _fp);

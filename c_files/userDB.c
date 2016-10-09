@@ -280,11 +280,12 @@ static int PrintOutName(void* _key, User_t* _user, void* _context)
 
 static void ReadUserDBfromFile(HashMap* _map, FILE* _fp)
 {
-	User_t* user = (User_t*) malloc(sizeof(User_t));	
+	User_t* user;	
 	size_t res = 0;	
 	/*TODO change to read the whole file at once*/
 	do
 	{
+		user = (User_t*) malloc(sizeof(User_t));		
 		res = fread(user, sizeof(User_t), 1, _fp);
 		HashMap_Insert(_map, user->m_username, user);
 	}
