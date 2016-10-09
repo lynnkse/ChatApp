@@ -128,7 +128,7 @@ int RunUserInterface(UserInterface* _userInterface)
 			_userInterface->m_choice = STARTUP;
 			break;
 		case GROUP_CREATE_SUCCESS:
-			printf("Group created successfully!\n");
+			printf("Group created successfully! You are now admin of %s\n", userInterface.m_groupname);
 			GetMenuOption(&_userInterface->m_choice);
 			break;
 		case GROUP_CREATE_FAILURE:

@@ -21,7 +21,7 @@ struct GroupDB_t
 struct Group_t
 {
 	char m_groupname[MAX_GROUPNAME_LENGTH];
-	char* m_admin;
+	char m_admin[MAX_USERNAME_LENGTH];;
 	char m_IP[IP_ADDR_LEN];
 	List* m_members;
 };
@@ -85,6 +85,7 @@ ChatRes GroupDB_CreateNewGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 	Group_t* group;
 	Zlog* traceZlog;
 	Zlog* errorZlog;
+	char* username;
 	
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");
@@ -100,6 +101,7 @@ ChatRes GroupDB_CreateNewGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 	if(HashMap_Insert(_groupDB->m_groups, group->m_groupname, group) == MAP_SUCCESS)
 	{
 		ZLOG_SEND(traceZlog, LOG_TRACE, "New group created, %d",1);
+		username = (char*) malloc(MAX_USERNAME_LENGTH);
 		_ui->m_choice = GROUP_CREATE_SUCCESS;
 		return SUCCESS;
 	}
@@ -128,7 +130,7 @@ ChatRes GroupDB_DeleteGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 		return FAILURE;
 	}
 	
-	if(IsUserMemberOfTheGroup(group, _ui))
+	if(strcmp(group->m_admin, _ui->m_username) == 0)
 	{
 		HashMap_Remove(_groupDB->m_groups, _ui->m_groupname, (void**) &group);
 		DestroyGroup(group);
@@ -360,6 +362,7 @@ static Group_t* FindGroup(GroupDB_t* _groupDB, UserInterface* _ui)
 static Group_t* CreateGroup(UserInterface* _ui)
 {
 	Group_t* group;
+	char* username;
 	static char multicastIP[] = BASE_MULTICAST_IP;
 	static int multicastIPlastByte  = LAST_BYTE;
 	
@@ -384,6 +387,10 @@ static Group_t* CreateGroup(UserInterface* _ui)
 		free(group);
 		return NULL;
 	}
+
+	strcpy(group->m_admin, _ui->m_username);
+	strcpy(username, _ui->m_username);
+	List_PushHead(group->m_members, username);
 	
 	return group;
 }
