@@ -3,7 +3,9 @@
 
 #include "../inc/internal.h"
 
-int RunUserInterface();
+int RunUserInterface(UserInterface* _userInterface);
+int RunSuperUserInterface(UserInterface* _userInterface);
+void EncryptPassword(char* _pass);
 
 
 UserInterface userInterface;

@@ -25,6 +25,8 @@ struct ClientManager_t
 {
 	SocketDesc m_socketDesc;
 	int m_userInputFD;
+	char m_superuser[MAX_USERNAME_LENGTH];
+	char m_SUpassword[MAX_PASSWORD_LENGTH];
 };
 
 ClientManager_t* clientManager;
@@ -61,6 +63,9 @@ void CreateClientManager()
 	}
 	
 	clientManager->m_userInputFD = STDIN_FD;
+	strcpy(clientManager->m_superuser, "superuser");
+	strcpy(clientManager->m_SUpassword, "123456");
+	EncryptPassword(clientManager->m_SUpassword);
 	free(configStruct);
 }
 
@@ -86,6 +91,7 @@ void OperateClient()
 
 	/*set user interface in initial state*/
 	userInterface.m_choice = STARTUP;
+	userInterface.m_SUchoice = SU_STARTUP;
 	
 	while(RunUserInterface(&userInterface))
 	{}

@@ -37,6 +37,7 @@ UserDB_t* CreateUserDB(size_t _cap)
 	Zlog* errorZlog;
 	UserDB_t* userDB;
 	FILE* fp = NULL;
+	User_t* superuser = NULL;
 
 	traceZlog = ZlogGet("trace");
 	errorZlog = ZlogGet("error");
@@ -64,6 +65,18 @@ UserDB_t* CreateUserDB(size_t _cap)
 	}
 
 	ZLOG_SEND(traceZlog, LOG_TRACE, "User DB was created, %d",1);
+
+	/*FIXME superuser created here - find another way perhaps*/
+	superuser = (User_t*) malloc(sizeof(User_t));
+	if(superuser)
+	{
+		strcpy(superuser->m_username, "superuser");
+		strcpy(superuser->m_password, "123456");
+		superuser->m_isBanned = 0;
+		superuser->m_isActive = 1;
+		
+		HashMap_Insert(userDB->m_users, superuser->m_username, superuser);
+	}
 
 	return userDB;
 }
